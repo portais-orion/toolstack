@@ -21,20 +21,6 @@ As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva 
 
 Não há passo de build: o `index.html` carrega `tools.json` e `systems.json` via `fetch()` em tempo de execução.
 
-## Como rodar localmente
-
-Como a página usa `fetch("tools.json")`, é preciso servir os arquivos por HTTP (abrir o `index.html` direto do disco com `file://` bloqueia o fetch por CORS). Qualquer servidor estático resolve:
-
-```bash
-# Python
-python3 -m http.server 8080
-
-# Node (sem instalação global)
-npx serve .
-```
-
-Depois acesse `http://localhost:8080`.
-
 ## Como atualizar o catálogo
 
 1. Abra `tools.json`.
@@ -59,10 +45,6 @@ Categorias são inferidas automaticamente a partir dos valores de `category` em 
 
 Apague o objeto correspondente de `tools.json`.
 
-### Logos que não carregam
-
-Se um logo não carregar (URL quebrada, ferramenta sem ícone público confiável), o card mostra automaticamente um placeholder com as iniciais do nome — não é necessário nenhum tratamento manual. Quando tiver um arquivo de logo para enviar manualmente, salve-o em uma pasta `assets/logos/` (crie se não existir) e aponte o campo `logo` para o caminho relativo, ex. `"logo": "assets/logos/minha-ferramenta.svg"`.
-
 ## Como atualizar a página de Sistemas
 
 1. Abra `systems.json`.
@@ -71,6 +53,7 @@ Se um logo não carregar (URL quebrada, ferramenta sem ícone público confiáve
    - `name` — nome de exibição do sistema/produto.
    - `company` — empresa responsável (Superterminais, SuperTrans, Aurora EADI ou Grupo Orion quando é uma plataforma interna sem dono único). Sistemas da mesma empresa são agrupados visualmente.
    - `companyColor` — cor do indicador (bolinha) ao lado do nome da empresa. Pode reaproveitar a cor de marca do tema correspondente em `nucleo-portais/packages/tokens/src/themes/`.
+   - `platform` — `"web"`, `"mobile"` ou `"web-mobile"`. Controla o badge (ícone + rótulo) exibido abaixo do status no card. Ver `PLATFORM_META` dentro do `<script>` de `index.html` para adicionar um novo valor de plataforma.
    - `status` — texto livre, ex. `"Em produção"` ou `"Em desenvolvimento (...)"`. Qualquer status contendo a palavra "desenvolvimento" usa o indicador laranja (em vez do teal) automaticamente.
    - `objective` — o que o sistema faz e por quê, em 2-4 frases.
    - `repoPath` — caminho do repositório dentro de `projetos/`.
@@ -80,18 +63,9 @@ Se um logo não carregar (URL quebrada, ferramenta sem ícone público confiáve
 3. Ao adicionar um novo sistema, garanta que todo `id` em `toolIds` já exista em `tools.json` — não há validação automática, um id inválido só falha silenciosamente (o chip não aparece).
 4. Para que o cross-link "tag de projeto → sistema" funcione a partir do modal de uma ferramenta, adicione o nome de pasta do projeto (o mesmo usado no campo `projects` de `tools.json`) ao mapa `PROJECT_TO_SYSTEM` dentro do `<script>` de `index.html`.
 
-## Publicação (GitHub Pages)
-
-1. No GitHub, vá em **Settings → Pages**.
-2. Em **Build and deployment → Source**, selecione **GitHub Actions**.
-3. Qualquer push em `main` dispara o workflow `.github/workflows/deploy.yml`, que publica o conteúdo do repositório como está (sem build).
 
 ## Metodologia de catalogação
 
 As ferramentas listadas foram identificadas a partir de evidência real nos repositórios em `projetos/`: `package.json`, lockfiles, `Dockerfile`, `docker-compose*.yml`, workflows de CI/CD (GitHub Actions e GitLab CI), arquivos `.env.example` e documentação interna (`README.md`, `CLAUDE.md`, ADRs). Ferramentas sem evidência clara de uso real não foram incluídas.
 
-Projetos analisados: `portal-supertrans`, `nucleo-portais` (Design System Orion), `app-almoxarifado`, `Portal_Fornecedor`, `Portal-Aurora`, `superfood` (Orionfood), `supertrans-app`.
-
-## Atualizando a análise no futuro
-
-Quando novos projetos forem adicionados a `projetos/` ou a stack de um projeto existente mudar significativamente, repita o processo: revise manifestos e configs, identifique o que mudou, e atualize `tools.json` (adicionando, removendo ou editando entradas — em especial o campo `projects` de cada ferramenta afetada).
+Projetos analisados: `portal-supertrans`, `Design System Orion`, `app-almoxarifado`, `Portal_Fornecedor`, `Portal-Aurora`, `Orionfood`, `supertrans-app`.
