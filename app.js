@@ -11,6 +11,7 @@
     view: "tools",
     sysCompany: "Todas",
     toolCompany: "Todas",
+    matrixMode: "cards",
     palIdx: 0,
     palRows: []
   };
@@ -532,55 +533,162 @@
 
   function filterMatrix(q) {
     var nq = norm(q.trim());
+
+    // Filter Cards Mode
+    renderMatrixCards();
+
+    // Filter Table Mode
     var table = document.querySelector(".m-table");
-    if (!table) return;
-    var rows = table.querySelectorAll("tbody tr");
-    var visibleRowCount = 0;
+    if (table) {
+      var rows = table.querySelectorAll("tbody tr");
+      var visibleRowCount = 0;
 
-    rows.forEach(function (row) {
-      var chips = row.querySelectorAll(".m-chip");
-      var catName = row.querySelector(".td-cat").textContent;
-      var catMatches = nq && norm(catName).indexOf(nq) !== -1;
-      var rowHasMatch = false;
+      rows.forEach(function (row) {
+        var chips = row.querySelectorAll(".m-chip");
+        var catName = row.querySelector(".td-cat").textContent;
+        var catMatches = nq && norm(catName).indexOf(nq) !== -1;
+        var rowHasMatch = false;
 
-      chips.forEach(function (chip) {
-        var name = chip.textContent;
-        var match = nq && (catMatches || norm(name).indexOf(nq) !== -1);
-        if (match) {
-          chip.classList.add("highlight");
-          chip.classList.remove("dim");
-          rowHasMatch = true;
-        } else if (nq) {
-          chip.classList.remove("highlight");
-          chip.classList.add("dim");
+        chips.forEach(function (chip) {
+          var name = chip.textContent;
+          var match = nq && (catMatches || norm(name).indexOf(nq) !== -1);
+          if (match) {
+            chip.classList.add("highlight");
+            chip.classList.remove("dim");
+            rowHasMatch = true;
+          } else if (nq) {
+            chip.classList.remove("highlight");
+            chip.classList.add("dim");
+          } else {
+            chip.classList.remove("highlight");
+            chip.classList.remove("dim");
+          }
+        });
+
+        if (!nq || catMatches || rowHasMatch) {
+          row.classList.remove("m-row-hidden");
+          visibleRowCount++;
         } else {
-          chip.classList.remove("highlight");
-          chip.classList.remove("dim");
+          row.classList.add("m-row-hidden");
         }
       });
+    }
+  }
 
-      if (!nq || catMatches || rowHasMatch) {
-        row.classList.remove("m-row-hidden");
-        visibleRowCount++;
-      } else {
-        row.classList.add("m-row-hidden");
-      }
+  function setMatrixMode(mode) {
+    S.matrixMode = mode;
+    var cardsGrid = document.getElementById("matrixCardsGrid");
+    var compWrap = document.getElementById("matrixCompareWrap");
+    var tableWrap = document.getElementById("matrixWrap");
+
+    if (cardsGrid) cardsGrid.style.display = mode === "cards" ? "grid" : "none";
+    if (compWrap) compWrap.style.display = mode === "compare" ? "flex" : "none";
+    if (tableWrap) tableWrap.style.display = mode === "table" ? "block" : "none";
+
+    Array.prototype.forEach.call(document.querySelectorAll("#matrixViewSwitch button"), function (b) {
+      b.setAttribute("aria-selected", String(b.dataset.mview === mode));
     });
 
-    var existingEmpty = document.getElementById("matrixEmptyMsg");
-    if (visibleRowCount === 0 && nq) {
-      table.style.display = "none";
-      if (!existingEmpty) {
-        var emp = document.createElement("div");
-        emp.id = "matrixEmptyMsg";
-        emp.className = "empty";
-        emp.innerHTML =
+    if (mode === "cards") renderMatrixCards();
+    else if (mode === "compare") renderMatrixCompare();
+  }
+
+  function renderMatrixCards() {
+    var host = document.getElementById("matrixCardsGrid");
+    if (!host) return;
+    host.innerHTML = "";
+
+    var mqInput = document.getElementById("matrixQ");
+    var q = norm((mqInput ? mqInput.value : "").trim());
+
+    var catMap = {};
+    S.tools.forEach(function (t) {
+      if (!catMap[t.category]) catMap[t.category] = [];
+      catMap[t.category].push(t);
+    });
+
+    var sortedCats = Object.keys(catMap).sort(function (a, b) {
+      return catMap[b].length - catMap[a].length || a.localeCompare(b, "pt");
+    });
+
+    var totalRendered = 0;
+
+    sortedCats.forEach(function (cat) {
+      var tools = catMap[cat].filter(function (t) {
+        if (!q) return true;
+        return norm(t.name + " " + cat + " " + (t.projects || []).join(" ")).indexOf(q) !== -1;
+      });
+
+      if (!tools.length) return;
+
+      tools.sort(function (a, b) {
+        return (b.projects || []).length - (a.projects || []).length || a.name.localeCompare(b.name, "pt");
+      });
+
+      var card = document.createElement("div");
+      card.className = "m-card";
+      card.innerHTML =
+        '<div class="m-card-h">' +
+          '<span class="m-card-title">' + esc(cat) + '</span>' +
+          '<span class="m-card-count">' + tools.length + (tools.length === 1 ? ' tecnologia' : ' tecnologias') + '</span>' +
+        '</div>' +
+        '<div class="m-card-list"></div>';
+
+      var list = card.querySelector(".m-card-list");
+      tools.forEach(function (t) {
+        var item = document.createElement("div");
+        item.className = "m-card-item";
+
+        var sysCount = (t._sys || []).length;
+        var usageLabel = sysCount === 0 ? "Geral" : sysCount === 1 ? "1 sistema" : sysCount + " sistemas";
+
+        item.innerHTML =
+          '<div class="m-item-top">' +
+            '<button class="m-item-tool" type="button">' +
+              '<span data-logo></span>' +
+              '<span>' + esc(t.name) + '</span>' +
+            '</button>' +
+            '<span class="m-item-usage">' + usageLabel + '</span>' +
+          '</div>' +
+          '<div class="m-item-sys-badges"></div>';
+
+        mountLogo(item.querySelector("[data-logo]"), t);
+        item.querySelector(".m-item-tool").onclick = function () { openTool(t); };
+
+        var badgesHost = item.querySelector(".m-item-sys-badges");
+        (t._sys || []).forEach(function (sysId) {
+          var sys = S.systems.find(function (s) { return s.id === sysId; });
+          if (!sys) return;
+          var badge = document.createElement("button");
+          badge.className = "m-sys-badge";
+          badge.type = "button";
+          badge.innerHTML = '<span class="dot" style="background:' + esc(sys.companyColor || "#888") + '"></span>' +
+            '<span>' + esc(sys.name) + '</span>';
+          badge.onclick = function (e) {
+            e.stopPropagation();
+            jumpToSystem(sys.id);
+          };
+          badgesHost.appendChild(badge);
+        });
+
+        list.appendChild(item);
+      });
+
+      host.appendChild(card);
+      totalRendered++;
+    });
+
+    if (totalRendered === 0 && q) {
+      host.innerHTML =
+        '<div class="empty">' +
           '<div class="empty-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>' +
           '<h3>Nenhuma tecnologia encontrada na matriz</h3>' +
           '<p>Nenhum item corresponde a "' + esc(q) + '".</p>' +
-          '<button class="btn-ghost" id="matrixEmptyReset">Limpar busca</button>';
-        table.parentNode.appendChild(emp);
-        emp.querySelector("#matrixEmptyReset").onclick = function () {
+          '<button class="btn-ghost" id="mCardsReset">Limpar busca</button>' +
+        '</div>';
+      var rBtn = host.querySelector("#mCardsReset");
+      if (rBtn) {
+        rBtn.onclick = function () {
           var mq = document.getElementById("matrixQ");
           if (mq) {
             mq.value = "";
@@ -591,14 +699,85 @@
           }
         };
       }
-    } else {
-      table.style.display = "";
-      if (existingEmpty) existingEmpty.parentNode.removeChild(existingEmpty);
     }
+  }
+
+  function renderMatrixCompare() {
+    var selA = document.getElementById("compSysA");
+    var selB = document.getElementById("compSysB");
+    var res = document.getElementById("compareResults");
+    if (!selA || !selB || !res) return;
+
+    if (selA.options.length === 0) {
+      S.systems.forEach(function (s) {
+        selA.add(new Option(s.name + " (" + s.company + ")", s.id));
+        selB.add(new Option(s.name + " (" + s.company + ")", s.id));
+      });
+      selA.selectedIndex = 0;
+      selB.selectedIndex = Math.min(1, S.systems.length - 1);
+
+      selA.onchange = renderMatrixCompare;
+      selB.onchange = renderMatrixCompare;
+    }
+
+    var sysA = S.systems.find(function (s) { return s.id === selA.value; }) || S.systems[0];
+    var sysB = S.systems.find(function (s) { return s.id === selB.value; }) || S.systems[1];
+
+    if (!sysA || !sysB) return;
+
+    var toolsA = (sysA.toolIds || []).map(function (id) { return S.byId[id]; }).filter(Boolean);
+    var toolsB = (sysB.toolIds || []).map(function (id) { return S.byId[id]; }).filter(Boolean);
+
+    var mapB = {};
+    toolsB.forEach(function (t) { mapB[t.id] = true; });
+    var mapA = {};
+    toolsA.forEach(function (t) { mapA[t.id] = true; });
+
+    var common = toolsA.filter(function (t) { return mapB[t.id]; });
+    var onlyA = toolsA.filter(function (t) { return !mapB[t.id]; });
+    var onlyB = toolsB.filter(function (t) { return !mapA[t.id]; });
+
+    res.innerHTML = "";
+
+    function makeCol(title, count, badgeColor, list) {
+      var col = document.createElement("div");
+      col.className = "compare-col";
+      col.innerHTML =
+        '<div class="compare-col-h">' +
+          '<span class="compare-col-title">' +
+            (badgeColor ? '<span class="dot" style="background:' + badgeColor + '"></span>' : '🤝 ') +
+            esc(title) +
+          '</span>' +
+          '<span class="compare-col-count">' + count + (count === 1 ? ' item' : ' itens') + '</span>' +
+        '</div>' +
+        '<div class="chips"></div>';
+      var ch = col.querySelector(".chips");
+      list.forEach(function (t) {
+        var c = document.createElement("button");
+        c.className = "chip";
+        var ico = document.createElement("span");
+        mountLogo(ico, t);
+        if (ico.firstChild && ico.firstChild.tagName === "IMG") c.appendChild(ico.firstChild);
+        else c.innerHTML = '<span class="mono">' + esc(initials(t.name)) + '</span>';
+        var nameSpan = document.createElement("span");
+        nameSpan.textContent = t.name;
+        c.appendChild(nameSpan);
+        c.onclick = function () { openTool(t); };
+        ch.appendChild(c);
+      });
+      return col;
+    }
+
+    res.appendChild(makeCol("Em Comum (" + common.length + ")", common.length, "", common));
+    res.appendChild(makeCol("Exclusivas de " + sysA.name, onlyA.length, sysA.companyColor, onlyA));
+    res.appendChild(makeCol("Exclusivas de " + sysB.name, onlyB.length, sysB.companyColor, onlyB));
   }
 
   function renderMatrix() {
     buildMatrixInsights();
+    renderMatrixCards();
+    renderMatrixCompare();
+
     var wrap = document.getElementById("matrixWrap");
     if (!wrap) return;
     wrap.innerHTML = "";
@@ -677,6 +856,8 @@
     });
     table.appendChild(tbody);
     wrap.appendChild(table);
+
+    setMatrixMode(S.matrixMode || "cards");
   }
 
   /* ---------------- navigation ---------------- */
@@ -1024,6 +1205,10 @@
 
     var expJson = document.getElementById("exportJsonBtn");
     if (expJson) expJson.onclick = exportJSON;
+
+    Array.prototype.forEach.call(document.querySelectorAll("#matrixViewSwitch button"), function (b) {
+      b.onclick = function () { setMatrixMode(b.dataset.mview); };
+    });
 
     document.addEventListener("keydown", function (e) {
       var palOpen = document.getElementById("pal").classList.contains("on");

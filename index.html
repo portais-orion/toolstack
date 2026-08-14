@@ -132,10 +132,16 @@
     <div class="matrix-toolbar">
       <div class="field" id="matrixField">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="matrixQ" type="text" placeholder="Filtrar ou destacar na matriz…" autocomplete="off" spellcheck="false" />
+        <input id="matrixQ" type="text" placeholder="Filtrar tecnologias na matriz…" autocomplete="off" spellcheck="false" />
         <button class="field-clear" id="matrixQClear" aria-label="Limpar">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
+      </div>
+
+      <div class="seg" role="tablist" id="matrixViewSwitch">
+        <button role="tab" data-mview="cards" aria-selected="true">Por Categoria</button>
+        <button role="tab" data-mview="compare" aria-selected="false">Comparar Sistemas</button>
+        <button role="tab" data-mview="table" aria-selected="false">Tabela</button>
       </div>
 
       <div class="export-actions">
@@ -150,7 +156,31 @@
       </div>
     </div>
 
-    <div class="matrix-wrap" id="matrixWrap"></div>
+    <!-- Mode 1: Responsive Category Cards (Default) -->
+    <div class="matrix-cards-grid" id="matrixCardsGrid"></div>
+
+    <!-- Mode 2: 1-on-1 Side-by-Side System Comparator -->
+    <div class="matrix-compare-wrap" id="matrixCompareWrap" style="display:none;">
+      <div class="compare-selectors">
+        <div class="compare-box">
+          <label class="lbl" for="compSysA">Sistema 1</label>
+          <div class="sel-wrap">
+            <select id="compSysA"></select>
+          </div>
+        </div>
+        <div class="compare-vs">VS</div>
+        <div class="compare-box">
+          <label class="lbl" for="compSysB">Sistema 2</label>
+          <div class="sel-wrap">
+            <select id="compSysB"></select>
+          </div>
+        </div>
+      </div>
+      <div id="compareResults" class="compare-results"></div>
+    </div>
+
+    <!-- Mode 3: Traditional Wide Table -->
+    <div class="matrix-wrap" id="matrixWrap" style="display:none;"></div>
   </div>
 </section>
 
