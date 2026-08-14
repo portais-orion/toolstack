@@ -2,14 +2,22 @@
 
 Catálogo estático das ferramentas, tecnologias e serviços usados nos projetos do grupo Orion (Superterminais, SuperTrans, Aurora EADI).
 
-Site publicado via GitHub Pages, sem backend, sem build step e sem dependências externas além dos ícones (Simple Icons via CDN).
+Site publicado via GitHub Pages, sem backend, sem build step e sem framework. As únicas dependências externas são a fonte Inter (Google Fonts) e os ícones das ferramentas (Simple Icons via CDN) — ambas degradam graciosamente se não carregarem.
 
 O site tem duas visões, alternadas por abas no topo (e por hash na URL, `#tools` / `#systems`):
 
-- **Ferramentas** — catálogo com busca e filtro por categoria (o que já existia).
-- **Sistemas** — os produtos do grupo agrupados por empresa, cada um com objetivo, arquitetura, destaques da stack e a lista completa de tecnologias usadas.
+- **Ferramentas** — catálogo com sidebar de categorias, busca, ordenação por uso ou alfabética.
+- **Sistemas** — os produtos do grupo agrupados por empresa, cada um com objetivo, plataforma (Web/Mobile), arquitetura, destaques da stack e a lista completa de tecnologias.
 
-As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva para ela filtrada na visão Ferramentas; clicar numa tag de projeto no modal de uma ferramenta leva para o sistema correspondente, já expandido.
+As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva para ela filtrada na visão Ferramentas; clicar numa tag de projeto no modal de uma ferramenta leva para o sistema correspondente, já expandido e destacado.
+
+### Detalhes de interface
+
+- **Ordenação "Mais usadas"** (padrão) ordena por quantidade de sistemas que usam a ferramenta — é o que dá hierarquia visual ao catálogo, em vez de 85 cards equivalentes.
+- **Os pontos no rodapé de cada card** representam os 7 sistemas do grupo, na mesma ordem de `systems.json`. Preenchido = aquela ferramenta é usada naquele sistema. Passe o mouse para ver o nome.
+- **Command palette** — `⌘K` / `Ctrl+K` busca ferramentas e sistemas ao mesmo tempo, com navegação por setas e `Enter`. `/` foca o filtro inline na visão Ferramentas. `Esc` fecha qualquer overlay.
+- **Logos que falham** caem para um monograma colorido derivado do nome da ferramenta (hue determinística), em vez de uma caixa cinza — ver `mountLogo()` e `hue()` em `index.html`.
+- **Tema claro/escuro** pelo botão no header. O escuro é o padrão.
 
 ## Como funciona
 
@@ -21,6 +29,20 @@ As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva 
 
 Não há passo de build: o `index.html` carrega `tools.json` e `systems.json` via `fetch()` em tempo de execução.
 
+## Como rodar localmente
+
+Como a página usa `fetch("tools.json")`, é preciso servir os arquivos por HTTP (abrir o `index.html` direto do disco com `file://` bloqueia o fetch por CORS). Qualquer servidor estático resolve:
+
+```bash
+# Python
+python3 -m http.server 8080
+
+# Node (sem instalação global)
+npx serve .
+```
+
+Depois acesse `http://localhost:8080`.
+
 ## Como atualizar o catálogo
 
 1. Abra `tools.json`.
@@ -28,7 +50,7 @@ Não há passo de build: o `index.html` carrega `tools.json` e `systems.json` vi
    - `id` — identificador único, kebab-case.
    - `name` — nome de exibição.
    - `category` — uma das categorias existentes (ou uma nova, se fizer sentido).
-   - `logo` — URL de um ícone SVG/PNG. Preferência: [Simple Icons](https://simpleicons.org/) via CDN (`https://cdn.simpleicons.org/<slug>/<cor-hex-sem-#>`), assets oficiais da ferramenta, ou [Devicon](https://devicon.dev/). Se não achar um ícone confiável, deixe o campo `logo` com uma URL mesmo que possa falhar — o card cai automaticamente para um placeholder com as iniciais do nome (ver `setLogo()` em `index.html`).
+   - `logo` — URL de um ícone SVG/PNG. Preferência: [Simple Icons](https://simpleicons.org/) via CDN (`https://cdn.simpleicons.org/<slug>/<cor-hex-sem-#>`), assets oficiais da ferramenta, ou [Devicon](https://devicon.dev/). Se não achar um ícone confiável, deixe o campo `logo` com uma URL mesmo que possa falhar — o card cai automaticamente para um monograma colorido com as iniciais do nome (ver `mountLogo()` em `index.html`).
    - `description` — 1-2 frases explicando o que é a ferramenta (independente do nosso uso).
    - `usage` — como *nós* usamos essa ferramenta, com base em evidência real do código/config. Não invente: se não há evidência clara, deixe isso explícito no texto.
    - `projects` — lista dos nomes de pasta em `projetos/` onde a ferramenta foi encontrada.
@@ -44,6 +66,10 @@ Categorias são inferidas automaticamente a partir dos valores de `category` em 
 ### Removendo uma ferramenta
 
 Apague o objeto correspondente de `tools.json`.
+
+### Logos que não carregam
+
+Se um logo não carregar (URL quebrada, ferramenta sem ícone público confiável), o card mostra automaticamente um monograma com as iniciais do nome, tingido com uma cor derivada do próprio nome — não é necessário nenhum tratamento manual. Quando tiver um arquivo de logo para enviar manualmente, salve-o em uma pasta `assets/logos/` (crie se não existir) e aponte o campo `logo` para o caminho relativo, ex. `"logo": "assets/logos/minha-ferramenta.svg"`.
 
 ## Como atualizar a página de Sistemas
 
@@ -63,9 +89,18 @@ Apague o objeto correspondente de `tools.json`.
 3. Ao adicionar um novo sistema, garanta que todo `id` em `toolIds` já exista em `tools.json` — não há validação automática, um id inválido só falha silenciosamente (o chip não aparece).
 4. Para que o cross-link "tag de projeto → sistema" funcione a partir do modal de uma ferramenta, adicione o nome de pasta do projeto (o mesmo usado no campo `projects` de `tools.json`) ao mapa `PROJECT_TO_SYSTEM` dentro do `<script>` de `index.html`.
 
+## Publicação (GitHub Pages)
+
+1. No GitHub, vá em **Settings → Pages**.
+2. Em **Build and deployment → Source**, selecione **GitHub Actions**.
+3. Qualquer push em `main` dispara o workflow `.github/workflows/deploy.yml`, que publica o conteúdo do repositório como está (sem build).
 
 ## Metodologia de catalogação
 
 As ferramentas listadas foram identificadas a partir de evidência real nos repositórios em `projetos/`: `package.json`, lockfiles, `Dockerfile`, `docker-compose*.yml`, workflows de CI/CD (GitHub Actions e GitLab CI), arquivos `.env.example` e documentação interna (`README.md`, `CLAUDE.md`, ADRs). Ferramentas sem evidência clara de uso real não foram incluídas.
 
-Projetos analisados: `portal-supertrans`, `Design System Orion`, `app-almoxarifado`, `Portal_Fornecedor`, `Portal-Aurora`, `Orionfood`, `supertrans-app`.
+Projetos analisados: `portal-supertrans`, `nucleo-portais` (Design System Orion), `app-almoxarifado`, `Portal_Fornecedor`, `Portal-Aurora`, `superfood` (Orionfood), `supertrans-app`.
+
+## Atualizando a análise no futuro
+
+Quando novos projetos forem adicionados a `projetos/` ou a stack de um projeto existente mudar significativamente, repita o processo: revise manifestos e configs, identifique o que mudou, e atualize `tools.json` (adicionando, removendo ou editando entradas — em especial o campo `projects` de cada ferramenta afetada).
