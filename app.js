@@ -47,6 +47,19 @@
     return ((w[0] || "?")[0] + (w[1] ? w[1][0] : "")).toUpperCase();
   }
 
+  function copyToClipboard(url, btn) {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(url).then(function () {
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> <span>Copiado!</span>';
+      btn.classList.add("copied");
+      setTimeout(function () {
+        btn.innerHTML = orig;
+        btn.classList.remove("copied");
+      }, 1800);
+    });
+  }
+
   // Deterministic hue per tool so fallback monograms look intentional, not gray.
   function hue(str) {
     var h = 0;
@@ -252,8 +265,8 @@
   function pips(t) {
     return S.systems.map(function (s) {
       var on = t._sys.indexOf(s.id) !== -1;
-      return '<span class="pip' + (on ? " on" : "") + '" title="' +
-        esc(s.name + (on ? "" : " — não usa")) + '"></span>';
+      var label = esc(s.name + (on ? " (utiliza)" : " (não utiliza)"));
+      return '<span class="pip' + (on ? " on" : "") + '" data-tip="' + label + '"></span>';
     }).join("");
   }
 
@@ -303,6 +316,7 @@
           '<span class="s-meta">' +
             '<span class="tag ' + (wip ? "wip" : "live") + '">' + esc(wip ? "Em desenvolvimento" : "Em produção") + "</span>" +
             (plat ? '<span class="tag plat">' + plat.icon + plat.label + "</span>" : "") +
+            '<button class="share-btn" data-sys-share aria-label="Copiar link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Link</span></button>' +
           "</span>" +
         "</span>" +
         '<span class="s-chev"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg></span>' +
@@ -319,6 +333,15 @@
           '<div class="repo">' + esc(s.repoPath) + "</div>" +
         "</div>" +
       "</div>";
+
+    var sysShare = card.querySelector("[data-sys-share]");
+    if (sysShare) {
+      sysShare.onclick = function (e) {
+        e.stopPropagation();
+        var url = location.origin + location.pathname + "#system/" + s.id;
+        copyToClipboard(url, sysShare);
+      };
+    }
 
     var icons = card.querySelector("[data-icons]");
     head.forEach(function (t) {
@@ -376,8 +399,21 @@
   }
 
   function route(instant) {
-    var h = (location.hash || "").replace("#", "");
-    setView(h === "systems" ? "systems" : "tools", { keepHash: true, instant: instant, noScroll: instant });
+    var raw = (location.hash || "").replace("#", "");
+    if (raw.indexOf("tool/") === 0) {
+      var toolId = raw.replace("tool/", "");
+      setView("tools", { keepHash: true, instant: instant, noScroll: instant });
+      if (S.byId[toolId]) {
+        openTool(S.byId[toolId], { keepHash: true });
+      }
+    } else if (raw.indexOf("system/") === 0) {
+      var sysId = raw.replace("system/", "");
+      setView("systems", { keepHash: true, instant: instant, noScroll: instant });
+      jumpToSystem(sysId, { keepHash: true });
+    } else {
+      closeSheets();
+      setView(raw === "systems" ? "systems" : "tools", { keepHash: true, instant: instant, noScroll: instant });
+    }
   }
 
   function jumpToTool(t) {
@@ -390,8 +426,10 @@
     setView("tools");
   }
 
-  function jumpToSystem(id) {
-    setView("systems");
+  function jumpToSystem(id, opts) {
+    opts = opts || {};
+    setView("systems", { keepHash: !!opts.keepHash });
+    if (!opts.keepHash) history.replaceState(null, "", "#system/" + id);
     setTimeout(function () {
       var c = document.getElementById("sys-" + id);
       if (!c) return;
@@ -408,13 +446,20 @@
 
   /* ---------------- tool modal ---------------- */
 
-  function openTool(t) {
+  function openTool(t, opts) {
+    opts = opts || {};
+    if (!opts.keepHash) history.replaceState(null, "", "#tool/" + t.id);
+    var shareUrl = location.origin + location.pathname + "#tool/" + t.id;
+
     var m = document.getElementById("modal");
     m.innerHTML =
       '<div class="m-head">' +
         '<span class="m-logo" data-logo></span>' +
         '<span class="m-title"><h2>' + esc(t.name) + '</h2><div class="t-cat">' + esc(t.category) + "</div></span>" +
-        '<button class="m-x" aria-label="Fechar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+        '<div class="m-actions">' +
+          '<button class="share-btn" id="mShare" aria-label="Copiar link direto"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copiar link</span></button>' +
+          '<button class="m-x" aria-label="Fechar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+        '</div>' +
       "</div>" +
       '<div class="m-body">' +
         "<div><p class=\"lbl\">O que é</p><p>" + esc(t.description) + "</p></div>" +
@@ -425,6 +470,14 @@
       "</div>";
 
     mountLogo(m.querySelector("[data-logo]"), t);
+
+    var shareBtn = m.querySelector("#mShare");
+    if (shareBtn) {
+      shareBtn.onclick = function (e) {
+        e.stopPropagation();
+        copyToClipboard(shareUrl, shareBtn);
+      };
+    }
 
     var ph = m.querySelector("[data-projs]");
     if (ph) {
@@ -534,6 +587,9 @@
     closeSheets();
     document.getElementById("scrim").classList.remove("on");
     document.body.style.overflow = "";
+    if (location.hash && location.hash.indexOf("#tool/") === 0) {
+      history.replaceState(null, "", "#" + S.view);
+    }
   }
 
   /* ---------------- events ---------------- */

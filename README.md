@@ -14,10 +14,10 @@ As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva 
 ### Detalhes de interface
 
 - **Ordenação "Mais usadas"** (padrão) ordena por quantidade de sistemas que usam a ferramenta — é o que dá hierarquia visual ao catálogo, em vez de 85 cards equivalentes.
-- **Os pontos no rodapé de cada card** representam os 7 sistemas do grupo, na mesma ordem de `systems.json`. Preenchido = aquela ferramenta é usada naquele sistema. Passe o mouse para ver o nome.
-- **Command palette** — `⌘K` / `Ctrl+K` busca ferramentas e sistemas ao mesmo tempo, com navegação por setas e `Enter`. `/` foca o filtro inline na visão Ferramentas. `Esc` fecha qualquer overlay.
+- **Deep Linking e Compartilhamento** — links diretos para cada ferramenta (`#tool/<id>`) ou sistema (`#system/<id>`), além de botões dedicados de **"Copiar link"** no modal e nos cards.
+- **Tooltips instantâneos** — passe o mouse sobre os pontos no rodapé de cada card para ver instantaneamente se aquele sistema específico utiliza a tecnologia.
 - **Logos que falham** caem para um monograma colorido derivado do nome da ferramenta (hue determinística), em vez de uma caixa cinza — ver `mountLogo()` e `hue()` em `app.js`.
-- **Tema claro/escuro** pelo botão no header. O escuro é o padrão.
+- **Tema claro/escuro** pelo botão no header, com preferência salva no `localStorage`. O escuro é o padrão.
 
 ## Como funciona
 
