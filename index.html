@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orion Toolstack — Catálogo de Ferramentas</title>
+<meta name="description" content="Catálogo de ferramentas, tecnologias e serviços usados nos projetos do Grupo Orion (Superterminais, SuperTrans, Aurora EADI)." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧰</text></svg>" />
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --bg-elevated: #ffffff;
+    --bg-hover: #f0f1f4;
+    --border: #e3e5e9;
+    --text: #14161a;
+    --text-muted: #5b6068;
+    --text-faint: #8a8f98;
+    --accent: #2d5bff;
+    --accent-soft: #eef1ff;
+    --shadow: 0 1px 2px rgba(20,22,26,0.04), 0 4px 12px rgba(20,22,26,0.06);
+    --shadow-hover: 0 2px 6px rgba(20,22,26,0.06), 0 12px 28px rgba(20,22,26,0.10);
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 7px;
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0e1014;
+    --bg-elevated: #161920;
+    --bg-hover: #1d212a;
+    --border: #262b35;
+    --text: #eef0f4;
+    --text-muted: #9aa1ac;
+    --text-faint: #676e79;
+    --accent: #6d8bff;
+    --accent-soft: #1a2140;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.3);
+    --shadow-hover: 0 2px 8px rgba(0,0,0,0.3), 0 16px 32px rgba(0,0,0,0.4);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  a { color: inherit; }
+
+  /* ---------- Header ---------- */
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #9b6dff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .brand-sub {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-left: 4px;
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .brand-sub { display: inline; }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--bg-hover);
+    border-color: var(--text-faint);
+  }
+
+  .theme-toggle:active { transform: scale(0.94); }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 40px 24px 8px;
+  }
+
+  .hero h1 {
+    font-size: clamp(26px, 4vw, 38px);
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 15.5px;
+    line-height: 1.6;
+    max-width: 680px;
+    margin: 0;
+  }
+
+  /* ---------- Controls ---------- */
+
+  .controls {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 24px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+  }
+
+  .search-box svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-size: 14.5px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .search-box input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search-box input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .result-count {
+    white-space: nowrap;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    padding: 0 4px;
+  }
+
+  .result-count strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .chip:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+    border-color: var(--text-faint);
+  }
+
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .chip .chip-count {
+    opacity: 0.65;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+  /* ---------- Grid ---------- */
+
+  .grid-section {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .card-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .card-logo img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .card-logo.placeholder {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-faint);
+  }
+
+  .card-heading {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-heading h3 {
+    margin: 0 0 4px;
+    font-size: 15.5px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .card-category {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+
+  .card-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .card-projects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .project-tag {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-faint);
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  .project-tag.more {
+    color: var(--text-muted);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state h3 {
+    color: var(--text);
+    margin: 0 0 8px;
+    font-size: 18px;
+  }
+
+  .empty-state p { margin: 0; font-size: 14px; }
+
+  /* ---------- Modal ---------- */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 11, 14, 0.55);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 6vh 16px;
+    z-index: 100;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    max-width: 560px;
+    width: 100%;
+    padding: 28px;
+    box-shadow: var(--shadow-hover);
+    animation: modal-in 0.16s ease;
+  }
+
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .modal-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .modal-logo img { width: 30px; height: 30px; object-fit: contain; }
+
+  .modal-title-row {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .modal-title-row h2 {
+    margin: 0 0 6px;
+    font-size: 21px;
+    letter-spacing: -0.015em;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    border-radius: 6px;
+  }
+
+  .modal-close:hover { background: var(--bg-hover); color: var(--text); }
+
+  .modal-section {
+    margin-bottom: 16px;
+  }
+
+  .modal-section:last-child { margin-bottom: 0; }
+
+  .modal-section h4 {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    margin: 0 0 6px;
+    font-weight: 650;
+  }
+
+  .modal-section p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+
+  .modal-projects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .modal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .modal-link:hover { text-decoration: underline; }
+
+  /* ---------- Footer ---------- */
+
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px 40px;
+  }
+
+  .footer-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
+  /* ---------- Scrollbar ---------- */
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    .search-row { flex-direction: column; align-items: stretch; }
+    .result-count { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark">🧰</span>
+      Orion Toolstack
+      <span class="brand-sub">Catálogo de ferramentas do grupo</span>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">🌙</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Ferramentas e tecnologias em uso</h1>
+  <p>Catálogo das ferramentas, tecnologias e serviços identificados nos repositórios do grupo Orion (Superterminais, SuperTrans, Aurora EADI) — montado a partir de package.json, Dockerfiles, docker-compose, workflows de CI/CD e documentação de cada projeto.</p>
+</section>
+
+<div class="controls">
+  <div class="search-row">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar por nome, descrição, projeto..." autocomplete="off" />
+    </div>
+    <div class="result-count" id="resultCount"></div>
+  </div>
+  <div class="filter-row" id="filterRow"></div>
+</div>
+
+<main class="grid-section">
+  <div class="grid" id="grid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <h3>Nenhuma ferramenta encontrada</h3>
+    <p>Tente ajustar a busca ou remover filtros de categoria.</p>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>Grupo Orion — Superterminais · SuperTrans · Aurora EADI</span>
+    <span id="footerCount"></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var state = {
+    tools: [],
+    query: "",
+    category: "Todas",
+  };
+
+  var PROJECT_LABELS = {
+    "portal-supertrans": "portal-supertrans",
+    "nucleo-portais": "nucleo-portais",
+    "app-almoxarifado": "app-almoxarifado",
+    "Portal_Fornecedor": "Portal_Fornecedor",
+    "Portal-Aurora": "Portal-Aurora",
+    "superfood": "superfood",
+    "supertrans-app": "supertrans-app"
+  };
+
+  // ---------- Theme ----------
+
+  function initTheme() {
+    var saved = null;
+    try { saved = window.localStorage ? null : null; } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var theme = prefersDark ? "dark" : "dark"; // default to dark for a tech catalog
+    document.documentElement.setAttribute("data-theme", theme);
+    updateThemeIcon(theme);
+  }
+
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute("data-theme");
+    var next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    updateThemeIcon(next);
+  }
+
+  function updateThemeIcon(theme) {
+    var btn = document.getElementById("themeToggle");
+    btn.textContent = theme === "dark" ? "☀️" : "🌙";
+  }
+
+  // ---------- Data loading ----------
+
+  function loadTools() {
+    fetch("tools.json")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state.tools = data;
+        buildFilters();
+        render();
+      })
+      .catch(function (err) {
+        document.getElementById("grid").innerHTML =
+          '<div class="empty-state"><h3>Erro ao carregar dados</h3><p>Não foi possível carregar tools.json.</p></div>';
+        console.error(err);
+      });
+  }
+
+  // ---------- Filters ----------
+
+  function buildFilters() {
+    var counts = {};
+    state.tools.forEach(function (t) {
+      counts[t.category] = (counts[t.category] || 0) + 1;
+    });
+    var categories = Object.keys(counts).sort(function (a, b) {
+      return counts[b] - counts[a];
+    });
+
+    var row = document.getElementById("filterRow");
+    row.innerHTML = "";
+
+    var allChip = makeChip("Todas", state.tools.length, true);
+    row.appendChild(allChip);
+
+    categories.forEach(function (cat) {
+      row.appendChild(makeChip(cat, counts[cat], false));
+    });
+  }
+
+  function makeChip(label, count, isAll) {
+    var chip = document.createElement("button");
+    chip.className = "chip" + (state.category === label ? " active" : "");
+    chip.innerHTML = label + ' <span class="chip-count">' + count + "</span>";
+    chip.addEventListener("click", function () {
+      state.category = label;
+      Array.prototype.forEach.call(
+        document.querySelectorAll(".chip"),
+        function (c) { c.classList.remove("active"); }
+      );
+      chip.classList.add("active");
+      render();
+    });
+    return chip;
+  }
+
+  // ---------- Filtering ----------
+
+  function getFiltered() {
+    var q = state.query.trim().toLowerCase();
+    return state.tools.filter(function (t) {
+      if (state.category !== "Todas" && t.category !== state.category) return false;
+      if (!q) return true;
+      var haystack = [
+        t.name, t.category, t.description, t.usage,
+        (t.projects || []).join(" ")
+      ].join(" ").toLowerCase();
+      return haystack.indexOf(q) !== -1;
+    });
+  }
+
+  // ---------- Render ----------
+
+  function render() {
+    var filtered = getFiltered();
+    var grid = document.getElementById("grid");
+    var empty = document.getElementById("emptyState");
+    var resultCount = document.getElementById("resultCount");
+    var footerCount = document.getElementById("footerCount");
+
+    resultCount.innerHTML = "<strong>" + filtered.length + "</strong> de " + state.tools.length + " ferramentas";
+    footerCount.textContent = state.tools.length + " ferramentas catalogadas";
+
+    if (filtered.length === 0) {
+      grid.style.display = "none";
+      empty.style.display = "block";
+      return;
+    }
+    grid.style.display = "grid";
+    empty.style.display = "none";
+
+    grid.innerHTML = "";
+    filtered.forEach(function (tool) {
+      grid.appendChild(makeCard(tool));
+    });
+  }
+
+  function makeCard(tool) {
+    var card = document.createElement("div");
+    card.className = "card";
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", "Ver detalhes de " + tool.name);
+
+    var projects = tool.projects || [];
+    var visibleProjects = projects.slice(0, 3);
+    var extra = projects.length - visibleProjects.length;
+
+    card.innerHTML =
+      '<div class="card-top">' +
+        '<div class="card-logo" data-logo-holder></div>' +
+        '<div class="card-heading">' +
+          "<h3>" + escapeHtml(tool.name) + "</h3>" +
+          '<span class="card-category">' + escapeHtml(tool.category) + "</span>" +
+        "</div>" +
+      "</div>" +
+      '<p class="card-desc">' + escapeHtml(tool.description) + "</p>" +
+      '<div class="card-projects">' +
+        visibleProjects.map(function (p) {
+          return '<span class="project-tag">' + escapeHtml(p) + "</span>";
+        }).join("") +
+        (extra > 0 ? '<span class="project-tag more">+' + extra + "</span>" : "") +
+      "</div>";
+
+    setLogo(card.querySelector("[data-logo-holder]"), tool);
+
+    card.addEventListener("click", function () { openModal(tool); });
+    card.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openModal(tool);
+      }
+    });
+
+    return card;
+  }
+
+  function setLogo(holder, tool) {
+    if (tool.logo) {
+      var img = document.createElement("img");
+      img.src = tool.logo;
+      img.alt = tool.name + " logo";
+      img.loading = "lazy";
+      img.onerror = function () {
+        holder.innerHTML = "";
+        holder.classList.add("placeholder");
+        holder.textContent = initials(tool.name);
+      };
+      holder.appendChild(img);
+    } else {
+      holder.classList.add("placeholder");
+      holder.textContent = initials(tool.name);
+    }
+  }
+
+  function initials(name) {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(function (w) { return w[0]; })
+      .join("")
+      .toUpperCase();
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // ---------- Modal ----------
+
+  function openModal(tool) {
+    var overlay = document.getElementById("modalOverlay");
+    var modal = document.getElementById("modal");
+
+    var projects = tool.projects || [];
+
+    modal.innerHTML =
+      '<div class="modal-header">' +
+        '<div class="modal-logo" data-modal-logo></div>' +
+        '<div class="modal-title-row">' +
+          "<div>" +
+            "<h2>" + escapeHtml(tool.name) + "</h2>" +
+            '<span class="card-category">' + escapeHtml(tool.category) + "</span>" +
+          "</div>" +
+          '<button class="modal-close" id="modalCloseBtn" aria-label="Fechar">✕</button>' +
+        "</div>" +
+      "</div>" +
+      '<div class="modal-section">' +
+        "<h4>Descrição</h4>" +
+        "<p>" + escapeHtml(tool.description) + "</p>" +
+      "</div>" +
+      '<div class="modal-section">' +
+        "<h4>Como usamos</h4>" +
+        "<p>" + escapeHtml(tool.usage) + "</p>" +
+      "</div>" +
+      (projects.length ? (
+        '<div class="modal-section">' +
+          "<h4>Projetos onde aparece</h4>" +
+          '<div class="modal-projects">' +
+            projects.map(function (p) {
+              return '<span class="project-tag">' + escapeHtml(p) + "</span>";
+            }).join("") +
+          "</div>" +
+        "</div>"
+      ) : "") +
+      (tool.link ? (
+        '<div class="modal-section">' +
+          '<a class="modal-link" href="' + escapeHtml(tool.link) + '" target="_blank" rel="noopener noreferrer">' +
+            "Site / documentação oficial ↗" +
+          "</a>" +
+        "</div>"
+      ) : "");
+
+    setLogo(modal.querySelector("[data-modal-logo]"), tool);
+
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+  }
+
+  function closeModal() {
+    var overlay = document.getElementById("modalOverlay");
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  // ---------- Events ----------
+
+  function initEvents() {
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+
+    var searchInput = document.getElementById("searchInput");
+    var debounceTimer;
+    searchInput.addEventListener("input", function (e) {
+      clearTimeout(debounceTimer);
+      var val = e.target.value;
+      debounceTimer = setTimeout(function () {
+        state.query = val;
+        render();
+      }, 120);
+    });
+
+    document.getElementById("modalOverlay").addEventListener("click", function (e) {
+      if (e.target.id === "modalOverlay") closeModal();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeModal();
+    });
+  }
+
+  // ---------- Init ----------
+
+  initTheme();
+  initEvents();
+  loadTools();
+})();
+</script>
+
+</body>
+</html>
