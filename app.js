@@ -9,6 +9,7 @@
     cat: "Todas",
     sort: "use",
     view: "tools",
+    sysCompany: "Todas",
     palIdx: 0,
     palRows: []
   };
@@ -105,6 +106,7 @@
     buildRail();
     renderTools();
     renderSystems();
+    renderMatrix();
     bind();
     route(true);
   }).catch(function (e) {
@@ -274,15 +276,47 @@
 
   function renderSystems() {
     var host = document.getElementById("sys");
+    var filters = document.getElementById("sysFilters");
     host.innerHTML = "";
 
     var groups = [], map = {};
     S.systems.forEach(function (s) {
-      if (!map[s.company]) { map[s.company] = { name: s.company, color: s.companyColor, items: [] }; groups.push(map[s.company]); }
+      if (!map[s.company]) {
+        map[s.company] = { name: s.company, color: s.companyColor, items: [] };
+        groups.push(map[s.company]);
+      }
       map[s.company].items.push(s);
     });
 
-    groups.forEach(function (g) {
+    if (filters) {
+      filters.innerHTML = "";
+      var allBtn = document.createElement("button");
+      allBtn.className = "sys-filter-btn";
+      allBtn.setAttribute("aria-pressed", String(S.sysCompany === "Todas"));
+      allBtn.innerHTML = '<span>Todas as Empresas</span> <span class="rail-n">(' + S.systems.length + ')</span>';
+      allBtn.onclick = function () {
+        S.sysCompany = "Todas";
+        renderSystems();
+      };
+      filters.appendChild(allBtn);
+
+      groups.forEach(function (g) {
+        var b = document.createElement("button");
+        b.className = "sys-filter-btn";
+        b.setAttribute("aria-pressed", String(S.sysCompany === g.name));
+        b.innerHTML = '<span class="dot" style="background:' + esc(g.color) + '"></span>' +
+          '<span>' + esc(g.name) + '</span> <span class="rail-n">(' + g.items.length + ')</span>';
+        b.onclick = function () {
+          S.sysCompany = g.name;
+          renderSystems();
+        };
+        filters.appendChild(b);
+      });
+    }
+
+    var visibleGroups = S.sysCompany === "Todas" ? groups : groups.filter(function (g) { return g.name === S.sysCompany; });
+
+    visibleGroups.forEach(function (g) {
       var sec = document.createElement("section");
       sec.className = "co";
       sec.innerHTML =
@@ -384,6 +418,228 @@
     return card;
   }
 
+  /* ---------------- exports ---------------- */
+
+  function downloadFile(filename, content, type) {
+    var blob = new Blob([content], { type: type || "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+  }
+
+  function exportMarkdown() {
+    var md = [];
+    md.push("# Catálogo de Tecnologias — Grupo Orion");
+    md.push("");
+    md.push("> Exportado automaticamente pelo catálogo Toolstack em " + new Date().toLocaleDateString("pt-BR") + ".");
+    md.push("");
+    md.push("## Visão Geral");
+    md.push("- **Total de Ferramentas:** " + S.tools.length);
+    md.push("- **Total de Sistemas:** " + S.systems.length);
+    md.push("");
+    md.push("## Sistemas do Grupo");
+    md.push("");
+    S.systems.forEach(function (s) {
+      md.push("### " + s.name + " (" + s.company + ")");
+      md.push("- **Status:** " + s.status);
+      md.push("- **Plataforma:** " + (PLAT[s.platform] ? PLAT[s.platform].label : s.platform));
+      md.push("- **Repositório:** `" + s.repoPath + "`");
+      md.push("- **Objetivo:** " + s.objective);
+      md.push("- **Arquitetura:** " + s.architecture);
+      if (s.stackHighlights && s.stackHighlights.length) {
+        md.push("- **Destaques da Stack:**");
+        s.stackHighlights.forEach(function (h) { md.push("  - " + h); });
+      }
+      md.push("");
+    });
+    md.push("## Matriz de Ferramentas por Categoria");
+    md.push("");
+    var catMap = {};
+    S.tools.forEach(function (t) {
+      if (!catMap[t.category]) catMap[t.category] = [];
+      catMap[t.category].push(t);
+    });
+    Object.keys(catMap).sort().forEach(function (cat) {
+      md.push("### " + cat);
+      md.push("| Ferramenta | Descrição | Onde é Usada |");
+      md.push("| :--- | :--- | :--- |");
+      catMap[cat].forEach(function (t) {
+        var projs = (t.projects || []).join(", ") || "—";
+        md.push("| [" + t.name + "](" + (t.link || "#") + ") | " + t.description.replace(/\|/g, "\\|") + " | " + projs + " |");
+      });
+      md.push("");
+    });
+    downloadFile("catalogo-tecnologias-orion.md", md.join("\n"), "text/markdown;charset=utf-8");
+  }
+
+  function exportJSON() {
+    var data = {
+      exportedAt: new Date().toISOString(),
+      toolsCount: S.tools.length,
+      systemsCount: S.systems.length,
+      systems: S.systems,
+      tools: S.tools
+    };
+    downloadFile("catalogo-tecnologias-orion.json", JSON.stringify(data, null, 2), "application/json;charset=utf-8");
+  }
+
+  /* ---------------- matrix ---------------- */
+
+  function buildMatrixInsights() {
+    var host = document.getElementById("matrixInsights");
+    if (!host) return;
+
+    var coreTools = S.tools.filter(function (t) { return (t.projects || []).length >= 4; });
+    var sharedTools = S.tools.filter(function (t) { var n = (t.projects || []).length; return n >= 2 && n <= 3; });
+    var nicheTools = S.tools.filter(function (t) { return (t.projects || []).length === 1; });
+    var stdRate = Math.round(((coreTools.length + sharedTools.length) / S.tools.length) * 100);
+
+    host.innerHTML =
+      '<div class="m-insight-card">' +
+        '<div class="m-insight-title">Tecnologias Padrão (Core)</div>' +
+        '<div class="m-insight-val">' + coreTools.length + '</div>' +
+        '<div class="m-insight-desc">Usadas em 4+ projetos (ex: ' + coreTools.slice(0, 3).map(function(t){ return t.name; }).join(", ") + ').</div>' +
+      '</div>' +
+      '<div class="m-insight-card">' +
+        '<div class="m-insight-title">Tecnologias Compartilhadas</div>' +
+        '<div class="m-insight-val">' + sharedTools.length + '</div>' +
+        '<div class="m-insight-desc">Adotadas por 2 a 3 projetos em comum.</div>' +
+      '</div>' +
+      '<div class="m-insight-card">' +
+        '<div class="m-insight-title">Tecnologias de Nicho</div>' +
+        '<div class="m-insight-val">' + nicheTools.length + '</div>' +
+        '<div class="m-insight-desc">Específicas de um único produto ou contexto.</div>' +
+      '</div>' +
+      '<div class="m-insight-card">' +
+        '<div class="m-insight-title">Taxa de Reuso de Stack</div>' +
+        '<div class="m-insight-val">' + stdRate + '%</div>' +
+        '<div class="m-insight-desc">Proporção de ferramentas reutilizadas entre times.</div>' +
+      '</div>';
+  }
+
+  function filterMatrix(q) {
+    var nq = norm(q.trim());
+    var table = document.querySelector(".m-table");
+    if (!table) return;
+    var rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach(function (row) {
+      var chips = row.querySelectorAll(".m-chip");
+      var catName = row.querySelector(".td-cat").textContent;
+      var catMatches = nq && norm(catName).indexOf(nq) !== -1;
+      var rowHasMatch = false;
+
+      chips.forEach(function (chip) {
+        var name = chip.textContent;
+        var match = nq && (catMatches || norm(name).indexOf(nq) !== -1);
+        if (match) {
+          chip.classList.add("highlight");
+          chip.classList.remove("dim");
+          rowHasMatch = true;
+        } else if (nq) {
+          chip.classList.remove("highlight");
+          chip.classList.add("dim");
+        } else {
+          chip.classList.remove("highlight");
+          chip.classList.remove("dim");
+        }
+      });
+
+      if (!nq || catMatches || rowHasMatch) {
+        row.classList.remove("m-row-hidden");
+      } else {
+        row.classList.add("m-row-hidden");
+      }
+    });
+  }
+
+  function renderMatrix() {
+    buildMatrixInsights();
+    var wrap = document.getElementById("matrixWrap");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+
+    var catMap = {};
+    S.tools.forEach(function (t) {
+      catMap[t.category] = (catMap[t.category] || 0) + 1;
+    });
+
+    var sortedCats = Object.keys(catMap).sort(function (a, b) {
+      return catMap[b] - catMap[a] || a.localeCompare(b, "pt");
+    });
+
+    var table = document.createElement("table");
+    table.className = "m-table";
+
+    var thead = document.createElement("thead");
+    var trHead = document.createElement("tr");
+    var thCat = document.createElement("th");
+    thCat.className = "th-cat";
+    thCat.textContent = "Categoria";
+    trHead.appendChild(thCat);
+
+    S.systems.forEach(function (s) {
+      var th = document.createElement("th");
+      th.innerHTML =
+        '<div class="th-sys-link" title="Ver sistema ' + esc(s.name) + '">' +
+          '<span class="th-sys-name">' + esc(s.name) + '</span>' +
+          '<span class="th-sys-co">' + esc(s.company) + '</span>' +
+        '</div>';
+      th.querySelector(".th-sys-link").onclick = function () {
+        jumpToSystem(s.id);
+      };
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    sortedCats.forEach(function (cat) {
+      var tr = document.createElement("tr");
+      var tdCat = document.createElement("td");
+      tdCat.className = "td-cat";
+      tdCat.textContent = cat;
+      tr.appendChild(tdCat);
+
+      S.systems.forEach(function (s) {
+        var td = document.createElement("td");
+        var sysTools = (s.toolIds || [])
+          .map(function (id) { return S.byId[id]; })
+          .filter(function (t) { return t && t.category === cat; });
+
+        if (sysTools.length === 0) {
+          td.innerHTML = '<span class="m-empty-cell">—</span>';
+        } else {
+          var chipBox = document.createElement("div");
+          chipBox.className = "m-chips";
+          sysTools.forEach(function (t) {
+            var chip = document.createElement("button");
+            chip.className = "m-chip";
+            var ico = document.createElement("span");
+            mountLogo(ico, t);
+            if (ico.firstChild && ico.firstChild.tagName === "IMG") chip.appendChild(ico.firstChild);
+            else chip.innerHTML = '<span class="mono">' + esc(initials(t.name)) + '</span>';
+            var nameSpan = document.createElement("span");
+            nameSpan.textContent = t.name;
+            chip.appendChild(nameSpan);
+            chip.onclick = function () { openTool(t); };
+            chipBox.appendChild(chip);
+          });
+          td.appendChild(chipBox);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+  }
+
   /* ---------------- navigation ---------------- */
 
   function setView(v, opts) {
@@ -391,6 +647,8 @@
     S.view = v;
     document.getElementById("v-tools").classList.toggle("on", v === "tools");
     document.getElementById("v-systems").classList.toggle("on", v === "systems");
+    var vMatrix = document.getElementById("v-matrix");
+    if (vMatrix) vMatrix.classList.toggle("on", v === "matrix");
     Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (b) {
       b.setAttribute("aria-selected", String(b.dataset.view === v));
     });
@@ -410,6 +668,9 @@
       var sysId = raw.replace("system/", "");
       setView("systems", { keepHash: true, instant: instant, noScroll: instant });
       jumpToSystem(sysId, { keepHash: true });
+    } else if (raw === "matrix" || raw === "matriz") {
+      closeSheets();
+      setView("matrix", { keepHash: true, instant: instant, noScroll: instant });
     } else {
       closeSheets();
       setView(raw === "systems" ? "systems" : "tools", { keepHash: true, instant: instant, noScroll: instant });
@@ -633,6 +894,30 @@
 
     var palQ = document.getElementById("palQ");
     palQ.oninput = function () { palRender(palQ.value); };
+
+    var mq = document.getElementById("matrixQ");
+    var mqField = document.getElementById("matrixField");
+    if (mq) {
+      mq.oninput = function () {
+        if (mqField) mqField.classList.toggle("has-val", !!mq.value);
+        filterMatrix(mq.value);
+      };
+      var mqClear = document.getElementById("matrixQClear");
+      if (mqClear) {
+        mqClear.onclick = function () {
+          mq.value = "";
+          if (mqField) mqField.classList.remove("has-val");
+          filterMatrix("");
+          mq.focus();
+        };
+      }
+    }
+
+    var expMd = document.getElementById("exportMdBtn");
+    if (expMd) expMd.onclick = exportMarkdown;
+
+    var expJson = document.getElementById("exportJsonBtn");
+    if (expJson) expJson.onclick = exportJSON;
 
     document.addEventListener("keydown", function (e) {
       var palOpen = document.getElementById("pal").classList.contains("on");

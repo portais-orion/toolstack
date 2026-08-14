@@ -4,12 +4,13 @@ Catálogo estático das ferramentas, tecnologias e serviços usados nos projetos
 
 Site publicado via GitHub Pages, sem backend e sem framework. As únicas dependências externas são a fonte Inter (Google Fonts) e os ícones das ferramentas (Simple Icons via CDN) — ambas degradam graciosamente se não carregarem.
 
-O site tem duas visões, alternadas por abas no topo (e por hash na URL, `#tools` / `#systems`):
+O site tem três visões, alternadas por abas no topo (e por hash na URL, `#tools` / `#systems` / `#matrix`):
 
 - **Ferramentas** — catálogo com sidebar de categorias, busca, ordenação por uso ou alfabética.
-- **Sistemas** — os produtos do grupo agrupados por empresa, cada um com objetivo, plataforma (Web/Mobile), arquitetura, destaques da stack e a lista completa de tecnologias.
+- **Sistemas** — os produtos do grupo agrupados e filtráveis por empresa, cada um com objetivo, plataforma (Web/Mobile), arquitetura, destaques da stack e a lista completa de tecnologias.
+- **Matriz** — tabela comparativa lado a lado das tecnologias de todos os sistemas, organizadas por categoria arquitetural.
 
-As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva para ela filtrada na visão Ferramentas; clicar numa tag de projeto no modal de uma ferramenta leva para o sistema correspondente, já expandido e destacado.
+As visões são cruzadas: clicar numa tecnologia dentro de um sistema ou na matriz leva para ela filtrada na visão Ferramentas; clicar numa tag de projeto no modal de uma ferramenta leva para o sistema correspondente, já expandido e destacado.
 
 ### Detalhes de interface
 

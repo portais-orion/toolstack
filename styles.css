@@ -1151,6 +1151,278 @@ kbd {
 .pal-foot span { display: flex; align-items: center; gap: 5px; }
 
 /* ============================================================
+   Company Filters & Matrix View
+   ============================================================ */
+
+.sys-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 24px;
+}
+
+.sys-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .13s, color .13s, border-color .13s;
+}
+
+.sys-filter-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.sys-filter-btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-line);
+  font-weight: 600;
+}
+
+.sys-filter-btn .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+
+.matrix-wrap {
+  padding-bottom: 96px;
+  overflow-x: auto;
+}
+
+.m-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  min-width: 900px;
+}
+
+.m-table th, .m-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+  text-align: left;
+}
+
+.m-table tr:last-child td {
+  border-bottom: none;
+}
+
+.m-table th:last-child, .m-table td:last-child {
+  border-right: none;
+}
+
+.m-table th {
+  background: var(--surface-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  position: sticky;
+  top: var(--header-h);
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.m-table th.th-cat {
+  width: 180px;
+  min-width: 160px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: 11px;
+}
+
+.m-table th .th-sys-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  transition: color .12s;
+}
+
+.m-table th .th-sys-link:hover .th-sys-name {
+  color: var(--accent);
+}
+
+.m-table th .th-sys-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.m-table th .th-sys-co {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: normal;
+}
+
+.m-table td.td-cat {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  white-space: nowrap;
+}
+
+.m-table .m-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.m-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color .12s, border-color .12s, transform .1s;
+  white-space: nowrap;
+}
+
+.m-chip:hover {
+  color: var(--accent);
+  border-color: var(--accent-line);
+  transform: translateY(-1px);
+}
+
+.m-chip img {
+  width: 12px; height: 12px; object-fit: contain;
+}
+
+.m-chip .mono {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-faint);
+  width: 12px;
+  text-align: center;
+}
+
+.m-empty-cell {
+  color: var(--text-faint);
+  font-size: 12px;
+  opacity: 0.35;
+  padding: 4px 0;
+}
+
+.matrix-insights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.m-insight-card {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m-insight-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-faint);
+}
+
+.m-insight-val {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.m-insight-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.matrix-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.export-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .13s, color .13s, border-color .13s;
+  white-space: nowrap;
+}
+
+.export-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.export-btn.downloading {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-line);
+}
+
+.m-chip.highlight {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.m-chip.dim {
+  opacity: 0.25;
+}
+
+.m-row-hidden {
+  display: none !important;
+}
+
+/* ============================================================
    Footer
    ============================================================ */
 
@@ -1177,4 +1449,46 @@ kbd {
     transition-duration: .001ms !important;
   }
   html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   Print / PDF Export
+   ============================================================ */
+
+@media print {
+  .hdr, .toolbar, .sys-filter-bar, .matrix-toolbar, .ftr, .scrim, .sheet, .share-btn, .kbd-btn, .icon-btn, #resetBtn {
+    display: none !important;
+  }
+  body, [data-theme] {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .shell {
+    max-width: 100% !important;
+    padding: 0 10px !important;
+  }
+  .hero {
+    padding: 16px 0 12px !important;
+  }
+  .hero::before {
+    display: none !important;
+  }
+  .m-table {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    font-size: 10.5px !important;
+    min-width: 100% !important;
+  }
+  .m-table th, .m-table td {
+    border-color: #ddd !important;
+    padding: 6px 8px !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .m-chip {
+    border: 1px solid #ccc !important;
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    font-size: 10px !important;
+  }
 }

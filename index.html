@@ -41,6 +41,7 @@
     <div class="seg" role="tablist">
       <button role="tab" data-view="tools" aria-selected="true">Ferramentas</button>
       <button role="tab" data-view="systems" aria-selected="false">Sistemas</button>
+      <button role="tab" data-view="matrix" aria-selected="false">Matriz</button>
     </div>
 
     <div class="hdr-actions">
@@ -104,7 +105,44 @@
       <h1>Os sistemas<br />do grupo.</h1>
       <p>O que já existe rodando, o objetivo de cada produto, a empresa responsável e a stack que sustenta cada um. Clique em uma tecnologia para ver onde mais ela aparece.</p>
     </div>
+    <div class="sys-filter-bar" id="sysFilters"></div>
     <div class="sys-wrap" id="sys"></div>
+  </div>
+</section>
+
+<!-- ============ MATRIX ============ -->
+<section class="view" id="v-matrix">
+  <div class="shell">
+    <div class="hero">
+      <div class="eyebrow">Comparativo Técnico</div>
+      <h1>Matriz de Tecnologias.</h1>
+      <p>Visão lado a lado das tecnologias utilizadas em cada produto do grupo, organizadas por categoria arquitetural para identificar padrões e sinergias.</p>
+    </div>
+
+    <div class="matrix-insights" id="matrixInsights"></div>
+
+    <div class="matrix-toolbar">
+      <div class="field" id="matrixField">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="matrixQ" type="text" placeholder="Filtrar ou destacar na matriz…" autocomplete="off" spellcheck="false" />
+        <button class="field-clear" id="matrixQClear" aria-label="Limpar">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="export-actions">
+        <button class="export-btn" id="exportMdBtn" aria-label="Exportar para Markdown">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Exportar .MD</span>
+        </button>
+        <button class="export-btn" id="exportJsonBtn" aria-label="Exportar para JSON">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Exportar .JSON</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="matrix-wrap" id="matrixWrap"></div>
   </div>
 </section>
 
