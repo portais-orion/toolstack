@@ -545,12 +545,14 @@
 
       rows.forEach(function (row) {
         var chips = row.querySelectorAll(".m-chip");
-        var catName = row.querySelector(".td-cat").textContent;
+        var catEl = row.querySelector(".td-cat-name") || row.querySelector(".td-cat");
+        var catName = catEl ? catEl.textContent : "";
         var catMatches = nq && norm(catName).indexOf(nq) !== -1;
         var rowHasMatch = false;
 
         chips.forEach(function (chip) {
-          var name = chip.textContent;
+          var nameEl = chip.querySelector(".m-chip-name");
+          var name = nameEl ? nameEl.textContent : chip.textContent;
           var match = nq && (catMatches || norm(name).indexOf(nq) !== -1);
           if (match) {
             chip.classList.add("highlight");
@@ -798,18 +800,42 @@
     var trHead = document.createElement("tr");
     var thCat = document.createElement("th");
     thCat.className = "th-cat";
-    thCat.textContent = "Categoria";
+    thCat.innerHTML =
+      '<div class="th-cat-content">' +
+        '<span class="th-cat-title">CATEGORIA</span>' +
+        '<span class="th-cat-sub">' + sortedCats.length + ' grupos</span>' +
+      '</div>';
     trHead.appendChild(thCat);
 
     S.systems.forEach(function (s) {
       var th = document.createElement("th");
+      th.className = "th-sys";
+      var platObj = PLAT[s.platform] || { label: s.platform || "Web", icon: "" };
+      var techCount = (s.toolIds || []).length;
+
       th.innerHTML =
-        '<div class="th-sys-link" title="Ver sistema ' + esc(s.name) + '">' +
-          '<span class="th-sys-name">' + esc(s.name) + '</span>' +
-          '<span class="th-sys-co">' + esc(s.company) + '</span>' +
+        '<div class="th-sys-card" role="button" tabindex="0" title="Ver sistema ' + esc(s.name) + '">' +
+          '<div class="th-sys-top">' +
+            '<span class="th-sys-co">' +
+              '<span class="dot" style="background:' + esc(s.companyColor || "var(--accent)") + '"></span>' +
+              esc(s.company) +
+            '</span>' +
+            '<span class="th-sys-plat">' + platObj.icon + '<span>' + esc(platObj.label) + '</span></span>' +
+          '</div>' +
+          '<div class="th-sys-name">' + esc(s.name) + '</div>' +
+          '<div class="th-sys-meta">' +
+            '<span class="th-sys-count"><b>' + techCount + '</b> techs</span>' +
+            '<span class="th-sys-action">Ver sistema →</span>' +
+          '</div>' +
         '</div>';
-      th.querySelector(".th-sys-link").onclick = function () {
-        jumpToSystem(s.id);
+
+      var linkEl = th.querySelector(".th-sys-card");
+      linkEl.onclick = function () { jumpToSystem(s.id); };
+      linkEl.onkeydown = function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          jumpToSystem(s.id);
+        }
       };
       trHead.appendChild(th);
     });
@@ -819,33 +845,51 @@
     var tbody = document.createElement("tbody");
     sortedCats.forEach(function (cat) {
       var tr = document.createElement("tr");
+      tr.className = "m-tr";
       var tdCat = document.createElement("td");
       tdCat.className = "td-cat";
-      tdCat.textContent = cat;
+
+      var catCount = catMap[cat] || 0;
+      tdCat.innerHTML =
+        '<div class="td-cat-wrap">' +
+          '<span class="td-cat-name">' + esc(cat) + '</span>' +
+          '<span class="td-cat-count">' + catCount + (catCount === 1 ? ' tecnologia' : ' tecnologias') + '</span>' +
+        '</div>';
       tr.appendChild(tdCat);
 
       S.systems.forEach(function (s) {
         var td = document.createElement("td");
+        td.className = "td-sys";
         var sysTools = (s.toolIds || [])
           .map(function (id) { return S.byId[id]; })
           .filter(function (t) { return t && t.category === cat; });
 
         if (sysTools.length === 0) {
-          td.innerHTML = '<span class="m-empty-cell">—</span>';
+          td.innerHTML = '<div class="m-empty-cell"><span class="m-empty-dash" title="Nenhuma tecnologia desta categoria adotada neste sistema">—</span></div>';
         } else {
           var chipBox = document.createElement("div");
           chipBox.className = "m-chips";
           sysTools.forEach(function (t) {
             var chip = document.createElement("button");
             chip.className = "m-chip";
-            var ico = document.createElement("span");
-            mountLogo(ico, t);
-            if (ico.firstChild && ico.firstChild.tagName === "IMG") chip.appendChild(ico.firstChild);
-            else chip.innerHTML = '<span class="mono">' + esc(initials(t.name)) + '</span>';
+            chip.type = "button";
+            chip.title = t.name + " (" + t.category + ") — Clique para ver detalhes";
+
+            var logoSpan = document.createElement("span");
+            logoSpan.className = "m-chip-logo";
+            logoSpan.setAttribute("data-logo", "");
+            mountLogo(logoSpan, t);
+            chip.appendChild(logoSpan);
+
             var nameSpan = document.createElement("span");
+            nameSpan.className = "m-chip-name";
             nameSpan.textContent = t.name;
             chip.appendChild(nameSpan);
-            chip.onclick = function () { openTool(t); };
+
+            chip.onclick = function (e) {
+              e.stopPropagation();
+              openTool(t);
+            };
             chipBox.appendChild(chip);
           });
           td.appendChild(chipBox);
