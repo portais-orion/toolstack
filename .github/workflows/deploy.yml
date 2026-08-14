@@ -30,6 +30,14 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate Dataset
+        run: node validate.js
+
       - name: Build / Prepare Dist
         run: |
           mkdir dist

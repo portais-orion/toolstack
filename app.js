@@ -35,6 +35,13 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   };
 
+  function norm(str) {
+    return String(str || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
   function initials(n) {
     var w = n.replace(/[^\w\s.+-]/g, "").split(/[\s.]+/).filter(Boolean);
     return ((w[0] || "?")[0] + (w[1] ? w[1][0] : "")).toUpperCase();
@@ -163,12 +170,13 @@
   /* ---------------- tools ---------------- */
 
   function filtered() {
-    var q = S.q.trim().toLowerCase();
+    var q = norm(S.q.trim());
     var out = S.tools.filter(function (t) {
       if (S.cat !== "Todas" && t.category !== S.cat) return false;
       if (!q) return true;
-      return (t.name + " " + t.category + " " + t.description + " " + t.usage + " " +
-        (t.projects || []).join(" ")).toLowerCase().indexOf(q) !== -1;
+      var haystack = norm(t.name + " " + t.category + " " + t.description + " " + t.usage + " " +
+        (t.projects || []).join(" "));
+      return haystack.indexOf(q) !== -1;
     });
     out.sort(function (a, b) {
       if (S.sort === "az") return a.name.localeCompare(b.name, "pt");
@@ -446,13 +454,13 @@
   }
 
   function palRender(q) {
-    q = q.trim().toLowerCase();
+    var nq = norm(q.trim());
     var host = document.getElementById("palList");
     var tools = S.tools.filter(function (t) {
-      return !q || (t.name + " " + t.category).toLowerCase().indexOf(q) !== -1;
+      return !nq || norm(t.name + " " + t.category).indexOf(nq) !== -1;
     }).slice(0, 7);
     var systems = S.systems.filter(function (s) {
-      return !q || (s.name + " " + s.company).toLowerCase().indexOf(q) !== -1;
+      return !nq || norm(s.name + " " + s.company).indexOf(nq) !== -1;
     }).slice(0, 5);
 
     S.palRows = [];
@@ -533,7 +541,9 @@
   function bind() {
     document.getElementById("themeBtn").onclick = function () {
       var cur = document.documentElement.getAttribute("data-theme");
-      document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      var next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("orion-theme", next); } catch (e) {}
     };
 
     Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (b) {
