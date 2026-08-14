@@ -10,6 +10,7 @@
     sort: "use",
     view: "tools",
     sysCompany: "Todas",
+    toolCompany: "Todas",
     palIdx: 0,
     palRows: []
   };
@@ -188,6 +189,13 @@
     var q = norm(S.q.trim());
     var out = S.tools.filter(function (t) {
       if (S.cat !== "Todas" && t.category !== S.cat) return false;
+      if (S.toolCompany && S.toolCompany !== "Todas") {
+        var inCompany = (t._sys || []).some(function (sysId) {
+          var sysObj = S.systems.find(function (s) { return s.id === sysId; });
+          return sysObj && sysObj.company === S.toolCompany;
+        });
+        if (!inCompany) return false;
+      }
       if (!q) return true;
       var haystack = norm(t.name + " " + t.category + " " + t.description + " " + t.usage + " " +
         (t.projects || []).join(" "));
@@ -527,6 +535,7 @@
     var table = document.querySelector(".m-table");
     if (!table) return;
     var rows = table.querySelectorAll("tbody tr");
+    var visibleRowCount = 0;
 
     rows.forEach(function (row) {
       var chips = row.querySelectorAll(".m-chip");
@@ -552,10 +561,40 @@
 
       if (!nq || catMatches || rowHasMatch) {
         row.classList.remove("m-row-hidden");
+        visibleRowCount++;
       } else {
         row.classList.add("m-row-hidden");
       }
     });
+
+    var existingEmpty = document.getElementById("matrixEmptyMsg");
+    if (visibleRowCount === 0 && nq) {
+      table.style.display = "none";
+      if (!existingEmpty) {
+        var emp = document.createElement("div");
+        emp.id = "matrixEmptyMsg";
+        emp.className = "empty";
+        emp.innerHTML =
+          '<div class="empty-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>' +
+          '<h3>Nenhuma tecnologia encontrada na matriz</h3>' +
+          '<p>Nenhum item corresponde a "' + esc(q) + '".</p>' +
+          '<button class="btn-ghost" id="matrixEmptyReset">Limpar busca</button>';
+        table.parentNode.appendChild(emp);
+        emp.querySelector("#matrixEmptyReset").onclick = function () {
+          var mq = document.getElementById("matrixQ");
+          if (mq) {
+            mq.value = "";
+            var mqField = document.getElementById("matrixField");
+            if (mqField) mqField.classList.remove("has-val");
+            filterMatrix("");
+            mq.focus();
+          }
+        };
+      }
+    } else {
+      table.style.display = "";
+      if (existingEmpty) existingEmpty.parentNode.removeChild(existingEmpty);
+    }
   }
 
   function renderMatrix() {
@@ -770,19 +809,78 @@
   function palRender(q) {
     var nq = norm(q.trim());
     var host = document.getElementById("palList");
+
+    var actions = [
+      {
+        name: "Ir para Catálogo de Ferramentas",
+        sub: "Visualizar todas as " + S.tools.length + " tecnologias",
+        icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+        run: function () { closeAll(); setView("tools"); }
+      },
+      {
+        name: "Ir para Sistemas do Grupo",
+        sub: "Visualizar os " + S.systems.length + " sistemas",
+        icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+        run: function () { closeAll(); setView("systems"); }
+      },
+      {
+        name: "Ir para Matriz de Tecnologias",
+        sub: "Tabela comparativa lado a lado",
+        icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+        run: function () { closeAll(); setView("matrix"); }
+      },
+      {
+        name: "Alternar Tema (Claro / Escuro)",
+        sub: "Mudar aparência visual do site",
+        icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>',
+        run: function () { document.getElementById("themeBtn").click(); closeAll(); }
+      },
+      {
+        name: "Exportar Relatório em Markdown (.md)",
+        sub: "Download do arquivo formatado",
+        icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+        run: function () { closeAll(); exportMarkdown(); }
+      },
+      {
+        name: "Exportar Catálogo em JSON (.json)",
+        sub: "Download do dataset unificado",
+        icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+        run: function () { closeAll(); exportJSON(); }
+      }
+    ];
+
+    var matchedActions = actions.filter(function (act) {
+      return !nq || norm(act.name + " " + act.sub).indexOf(nq) !== -1;
+    });
+
     var tools = S.tools.filter(function (t) {
       return !nq || norm(t.name + " " + t.category).indexOf(nq) !== -1;
-    }).slice(0, 7);
+    }).slice(0, 6);
+
     var systems = S.systems.filter(function (s) {
       return !nq || norm(s.name + " " + s.company).indexOf(nq) !== -1;
-    }).slice(0, 5);
+    }).slice(0, 4);
 
     S.palRows = [];
     host.innerHTML = "";
 
-    if (!tools.length && !systems.length) {
-      host.innerHTML = '<div class="pal-empty">Nenhum resultado.</div>';
+    if (!matchedActions.length && !tools.length && !systems.length) {
+      host.innerHTML = '<div class="pal-empty">Nenhum resultado para "' + esc(q) + '".</div>';
       return;
+    }
+
+    if (matchedActions.length && (nq.length === 0 || matchedActions.length < 4)) {
+      host.insertAdjacentHTML("beforeend", '<div class="pal-grp">Ações Globais</div>');
+      matchedActions.forEach(function (act) {
+        var b = document.createElement("button");
+        b.className = "pal-row";
+        b.innerHTML = '<span class="pal-ic">' + act.icon + '</span>' +
+          '<span class="pal-txt"><span class="pal-nm">' + esc(act.name) + '</span>' +
+          '<span class="pal-sub">' + esc(act.sub) + '</span></span>';
+        b.onclick = act.run;
+        host.appendChild(b);
+        S.palRows.push(b);
+      });
     }
 
     if (systems.length) {
@@ -888,6 +986,14 @@
     document.getElementById("qClear").onclick = function () {
       q.value = ""; S.q = ""; field.classList.remove("has-val"); renderTools(); q.focus();
     };
+
+    var compSel = document.getElementById("companySelect");
+    if (compSel) {
+      compSel.onchange = function () {
+        S.toolCompany = compSel.value;
+        renderTools();
+      };
+    }
 
     document.getElementById("palBtn").onclick = openPal;
     document.getElementById("scrim").onclick = closeAll;

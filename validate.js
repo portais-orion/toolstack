@@ -54,6 +54,14 @@ function run() {
 
     if (!tool.name) errors.push(`${pos} is missing required field 'name'.`);
     if (!tool.category) errors.push(`${pos} is missing required field 'category'.`);
+
+    if (tool.link && !/^https?:\/\//i.test(tool.link)) {
+      warnings.push(`${pos} field 'link' does not start with http:// or https://: "${tool.link}"`);
+    }
+
+    if (tool.logo && !/^https?:\/\//i.test(tool.logo) && !/^assets\//i.test(tool.logo)) {
+      warnings.push(`${pos} field 'logo' is not a valid HTTP URL or local assets path: "${tool.logo}"`);
+    }
   });
 
   // 4. Check systems IDs and cross-reference toolIds
