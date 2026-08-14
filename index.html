@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Orion Toolstack — Catálogo de Ferramentas</title>
-<meta name="description" content="Catálogo de ferramentas, tecnologias e serviços usados nos projetos do Grupo Orion (Superterminais, SuperTrans, Aurora EADI)." />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧰</text></svg>" />
+<title>Stack de Tecnologias Orion</title>
+<meta name="description" content="Catálogo de ferramentas, tecnologias e sistemas usados nos projetos do Grupo Orion (Superterminais, SuperTrans, Aurora EADI)." />
+<link rel="icon" type="image/png" href="assets/orion-favicon.png" />
 <style>
   :root {
     --bg: #f7f8fa;
@@ -15,8 +15,11 @@
     --text: #14161a;
     --text-muted: #5b6068;
     --text-faint: #8a8f98;
-    --accent: #2d5bff;
-    --accent-soft: #eef1ff;
+    --accent: #29a699;
+    --accent-hover: #238b82;
+    --accent-soft: #e3f5f3;
+    --brand-secondary: #d95a11;
+    --brand-secondary-soft: #fbe9dd;
     --shadow: 0 1px 2px rgba(20,22,26,0.04), 0 4px 12px rgba(20,22,26,0.06);
     --shadow-hover: 0 2px 6px rgba(20,22,26,0.06), 0 12px 28px rgba(20,22,26,0.10);
     --radius-lg: 16px;
@@ -26,15 +29,18 @@
   }
 
   [data-theme="dark"] {
-    --bg: #0e1014;
-    --bg-elevated: #161920;
-    --bg-hover: #1d212a;
-    --border: #262b35;
-    --text: #eef0f4;
-    --text-muted: #9aa1ac;
-    --text-faint: #676e79;
-    --accent: #6d8bff;
-    --accent-soft: #1a2140;
+    --bg: #0b1210;
+    --bg-elevated: #0f2320;
+    --bg-hover: #143430;
+    --border: #1e433d;
+    --text: #eef4f2;
+    --text-muted: #9bb3ae;
+    --text-faint: #64827c;
+    --accent: #29a699;
+    --accent-hover: #3ec2b3;
+    --accent-soft: #12332e;
+    --brand-secondary: #e56b1f;
+    --brand-secondary-soft: #2e1c10;
     --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.3);
     --shadow-hover: 0 2px 8px rgba(0,0,0,0.3), 0 16px 32px rgba(0,0,0,0.4);
     color-scheme: dark;
@@ -57,6 +63,13 @@
 
   a { color: inherit; }
 
+  .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
   /* ---------- Header ---------- */
 
   .site-header {
@@ -71,7 +84,7 @@
   .header-inner {
     max-width: 1240px;
     margin: 0 auto;
-    padding: 18px 24px;
+    padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -83,20 +96,27 @@
     align-items: center;
     gap: 10px;
     font-weight: 700;
-    font-size: 17px;
+    font-size: 16.5px;
     letter-spacing: -0.01em;
   }
 
   .brand-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #9b6dff);
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .brand-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .brand-sub {
@@ -107,7 +127,7 @@
     display: none;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 720px) {
     .brand-sub { display: inline; }
   }
 
@@ -115,6 +135,35 @@
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .nav-tab {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .nav-tab:hover { color: var(--text); }
+
+  .nav-tab.active {
+    background: var(--accent);
+    color: #fff;
   }
 
   .theme-toggle {
@@ -129,6 +178,7 @@
     align-items: center;
     justify-content: center;
     font-size: 17px;
+    flex-shrink: 0;
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   }
 
@@ -142,9 +192,7 @@
   /* ---------- Hero ---------- */
 
   .hero {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 40px 24px 8px;
+    padding: 40px 0 8px;
   }
 
   .hero h1 {
@@ -158,16 +206,14 @@
     color: var(--text-muted);
     font-size: 15.5px;
     line-height: 1.6;
-    max-width: 680px;
+    max-width: 700px;
     margin: 0;
   }
 
   /* ---------- Controls ---------- */
 
   .controls {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 24px 24px 4px;
+    padding: 24px 0 4px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -263,12 +309,15 @@
     font-size: 12px;
   }
 
-  /* ---------- Grid ---------- */
+  /* ---------- Views ---------- */
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- Tools Grid ---------- */
 
   .grid-section {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 28px 24px 80px;
+    padding: 28px 0 80px;
   }
 
   .grid {
@@ -375,10 +424,22 @@
     border: 1px solid var(--border);
     padding: 2px 7px;
     border-radius: 5px;
+    cursor: default;
   }
 
   .project-tag.more {
     color: var(--text-muted);
+  }
+
+  .project-tag.linkable {
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .project-tag.linkable:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   .empty-state {
@@ -394,6 +455,238 @@
   }
 
   .empty-state p { margin: 0; font-size: 14px; }
+
+  /* ---------- Systems view ---------- */
+
+  .systems-section {
+    padding: 28px 0 80px;
+  }
+
+  .company-group {
+    margin-bottom: 40px;
+  }
+
+  .company-group:last-child { margin-bottom: 0; }
+
+  .company-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .company-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .company-heading h2 {
+    font-size: 17px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .company-count {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    font-weight: 500;
+  }
+
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .system-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .system-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .system-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .system-card-top h3 {
+    margin: 0 0 5px;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  .system-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .system-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .system-status.wip::before {
+    background: var(--brand-secondary);
+  }
+
+  .system-expand {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+
+  .system-expand:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+
+  .system-expand svg {
+    transition: transform 0.2s ease;
+  }
+
+  .system-card.expanded .system-expand svg {
+    transform: rotate(180deg);
+  }
+
+  .system-objective {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .system-stack-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .stack-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    padding: 4px 9px 4px 6px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .stack-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .stack-chip img {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .stack-chip .stack-chip-fallback {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .stack-chip.more-chip {
+    color: var(--text-faint);
+    cursor: default;
+  }
+
+  .stack-chip.more-chip:hover {
+    border-color: var(--border);
+    color: var(--text-faint);
+  }
+
+  .system-details {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .system-card.expanded .system-details {
+    display: flex;
+  }
+
+  .system-details h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    margin: 0 0 8px;
+    font-weight: 650;
+  }
+
+  .system-details p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .highlight-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-muted);
+  }
+
+  .highlight-list li::marker { color: var(--accent); }
+
+  .system-full-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .system-repo-path {
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
 
   /* ---------- Modal ---------- */
 
@@ -520,18 +813,33 @@
 
   .site-footer {
     border-top: 1px solid var(--border);
-    padding: 28px 24px 40px;
+    padding: 28px 0 40px;
   }
 
   .footer-inner {
     max-width: 1240px;
     margin: 0 auto;
+    padding: 0 24px;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     gap: 12px;
     color: var(--text-faint);
     font-size: 13px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-brand img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    opacity: 0.8;
   }
 
   /* ---------- Scrollbar ---------- */
@@ -546,8 +854,11 @@
 
   @media (max-width: 560px) {
     .grid { grid-template-columns: 1fr; }
+    .systems-grid { grid-template-columns: 1fr; }
     .search-row { flex-direction: column; align-items: stretch; }
     .result-count { text-align: left; }
+    .header-inner { flex-wrap: wrap; }
+    .nav-tabs { order: 3; width: 100%; justify-content: center; }
   }
 </style>
 </head>
@@ -556,39 +867,58 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="brand">
-      <span class="brand-mark">🧰</span>
-      Orion Toolstack
-      <span class="brand-sub">Catálogo de ferramentas do grupo</span>
+      <span class="brand-mark"><img src="assets/orion-mark.png" alt="Orion" /></span>
+      Stack de Tecnologias Orion
+      <span class="brand-sub">Catálogo do grupo</span>
     </div>
     <div class="header-actions">
+      <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab" data-view="tools">Ferramentas</button>
+        <button class="nav-tab" data-view="systems">Sistemas</button>
+      </nav>
       <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">🌙</button>
     </div>
   </div>
 </header>
 
-<section class="hero">
-  <h1>Ferramentas e tecnologias em uso</h1>
-  <p>Catálogo das ferramentas, tecnologias e serviços identificados nos repositórios do grupo Orion (Superterminais, SuperTrans, Aurora EADI) — montado a partir de package.json, Dockerfiles, docker-compose, workflows de CI/CD e documentação de cada projeto.</p>
-</section>
+<!-- ===================== TOOLS VIEW ===================== -->
 
-<div class="controls">
-  <div class="search-row">
-    <div class="search-box">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" id="searchInput" placeholder="Buscar por nome, descrição, projeto..." autocomplete="off" />
+<div class="view" id="view-tools">
+  <section class="hero wrap">
+    <h1>Ferramentas e tecnologias em uso</h1>
+    <p>Catálogo das ferramentas, tecnologias e serviços identificados nos repositórios do grupo Orion (Superterminais, SuperTrans, Aurora EADI) — montado a partir de package.json, Dockerfiles, docker-compose, workflows de CI/CD e documentação de cada projeto.</p>
+  </section>
+
+  <div class="controls wrap">
+    <div class="search-row">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar por nome, descrição, projeto..." autocomplete="off" />
+      </div>
+      <div class="result-count" id="resultCount"></div>
     </div>
-    <div class="result-count" id="resultCount"></div>
+    <div class="filter-row" id="filterRow"></div>
   </div>
-  <div class="filter-row" id="filterRow"></div>
+
+  <main class="grid-section wrap">
+    <div class="grid" id="grid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <h3>Nenhuma ferramenta encontrada</h3>
+      <p>Tente ajustar a busca ou remover filtros de categoria.</p>
+    </div>
+  </main>
 </div>
 
-<main class="grid-section">
-  <div class="grid" id="grid"></div>
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <h3>Nenhuma ferramenta encontrada</h3>
-    <p>Tente ajustar a busca ou remover filtros de categoria.</p>
-  </div>
-</main>
+<!-- ===================== SYSTEMS VIEW ===================== -->
+
+<div class="view" id="view-systems">
+  <section class="hero wrap">
+    <h1>Sistemas do grupo</h1>
+    <p>Os produtos e aplicações que já existem no grupo Orion, com o objetivo de cada um, a empresa responsável e a stack tecnológica usada. Clique em um sistema para ver mais detalhes, ou em uma tecnologia para ver todos os sistemas que a utilizam.</p>
+  </section>
+
+  <main class="systems-section wrap" id="systemsContainer"></main>
+</div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" id="modal"></div>
@@ -596,7 +926,7 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <span>Grupo Orion — Superterminais · SuperTrans · Aurora EADI</span>
+    <span class="footer-brand"><img src="assets/orion-mark.png" alt="" /> Grupo Orion — Superterminais · SuperTrans · Aurora EADI</span>
     <span id="footerCount"></span>
   </div>
 </footer>
@@ -607,16 +937,21 @@
 
   var state = {
     tools: [],
+    systems: [],
     query: "",
     category: "Todas",
+    view: "tools",
   };
 
-  var PROJECT_LABELS = {
+  var toolsById = {};
+
+  // Maps tools.json's `projects` folder-name strings to systems.json ids.
+  var PROJECT_TO_SYSTEM = {
     "portal-supertrans": "portal-supertrans",
     "nucleo-portais": "nucleo-portais",
     "app-almoxarifado": "app-almoxarifado",
-    "Portal_Fornecedor": "Portal_Fornecedor",
-    "Portal-Aurora": "Portal-Aurora",
+    "Portal_Fornecedor": "portal-fornecedor",
+    "Portal-Aurora": "portal-aurora",
     "superfood": "superfood",
     "supertrans-app": "supertrans-app"
   };
@@ -624,8 +959,6 @@
   // ---------- Theme ----------
 
   function initTheme() {
-    var saved = null;
-    try { saved = window.localStorage ? null : null; } catch (e) {}
     var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     var theme = prefersDark ? "dark" : "dark"; // default to dark for a tech catalog
     document.documentElement.setAttribute("data-theme", theme);
@@ -644,24 +977,60 @@
     btn.textContent = theme === "dark" ? "☀️" : "🌙";
   }
 
-  // ---------- Data loading ----------
+  // ---------- View routing ----------
 
-  function loadTools() {
-    fetch("tools.json")
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        state.tools = data;
-        buildFilters();
-        render();
-      })
-      .catch(function (err) {
-        document.getElementById("grid").innerHTML =
-          '<div class="empty-state"><h3>Erro ao carregar dados</h3><p>Não foi possível carregar tools.json.</p></div>';
-        console.error(err);
-      });
+  function setView(view, opts) {
+    opts = opts || {};
+    state.view = view;
+    document.getElementById("view-tools").classList.toggle("active", view === "tools");
+    document.getElementById("view-systems").classList.toggle("active", view === "systems");
+    Array.prototype.forEach.call(document.querySelectorAll(".nav-tab"), function (tab) {
+      tab.classList.toggle("active", tab.getAttribute("data-view") === view);
+    });
+    if (!opts.skipHash) {
+      history.replaceState(null, "", "#" + view);
+    }
+    window.scrollTo({ top: 0, behavior: opts.smooth ? "smooth" : "auto" });
   }
 
-  // ---------- Filters ----------
+  function initRouting() {
+    var hash = (window.location.hash || "").replace("#", "");
+    setView(hash === "systems" ? "systems" : "tools", { skipHash: true });
+
+    Array.prototype.forEach.call(document.querySelectorAll(".nav-tab"), function (tab) {
+      tab.addEventListener("click", function () {
+        setView(tab.getAttribute("data-view"));
+      });
+    });
+
+    window.addEventListener("hashchange", function () {
+      var h = (window.location.hash || "").replace("#", "");
+      if (h === "systems" || h === "tools") setView(h, { skipHash: true });
+    });
+  }
+
+  // ---------- Data loading ----------
+
+  function loadData() {
+    Promise.all([
+      fetch("tools.json").then(function (r) { return r.json(); }),
+      fetch("systems.json").then(function (r) { return r.json(); })
+    ]).then(function (results) {
+      state.tools = results[0];
+      state.systems = results[1];
+      state.tools.forEach(function (t) { toolsById[t.id] = t; });
+
+      buildFilters();
+      render();
+      renderSystems();
+    }).catch(function (err) {
+      document.getElementById("grid").innerHTML =
+        '<div class="empty-state"><h3>Erro ao carregar dados</h3><p>Não foi possível carregar tools.json ou systems.json.</p></div>';
+      console.error(err);
+    });
+  }
+
+  // ---------- Filters (tools view) ----------
 
   function buildFilters() {
     var counts = {};
@@ -675,18 +1044,16 @@
     var row = document.getElementById("filterRow");
     row.innerHTML = "";
 
-    var allChip = makeChip("Todas", state.tools.length, true);
-    row.appendChild(allChip);
-
+    row.appendChild(makeChip("Todas", state.tools.length));
     categories.forEach(function (cat) {
-      row.appendChild(makeChip(cat, counts[cat], false));
+      row.appendChild(makeChip(cat, counts[cat]));
     });
   }
 
-  function makeChip(label, count, isAll) {
+  function makeChip(label, count) {
     var chip = document.createElement("button");
     chip.className = "chip" + (state.category === label ? " active" : "");
-    chip.innerHTML = label + ' <span class="chip-count">' + count + "</span>";
+    chip.innerHTML = escapeHtml(label) + ' <span class="chip-count">' + count + "</span>";
     chip.addEventListener("click", function () {
       state.category = label;
       Array.prototype.forEach.call(
@@ -699,7 +1066,27 @@
     return chip;
   }
 
-  // ---------- Filtering ----------
+  function filterByCategory(cat) {
+    state.category = cat;
+    state.query = "";
+    document.getElementById("searchInput").value = "";
+    buildFilters();
+    render();
+    setView("tools", { smooth: true });
+  }
+
+  function filterByTool(toolId) {
+    var tool = toolsById[toolId];
+    if (!tool) return;
+    state.category = "Todas";
+    state.query = tool.name;
+    document.getElementById("searchInput").value = tool.name;
+    buildFilters();
+    render();
+    setView("tools", { smooth: true });
+  }
+
+  // ---------- Tools filtering ----------
 
   function getFiltered() {
     var q = state.query.trim().toLowerCase();
@@ -714,7 +1101,7 @@
     });
   }
 
-  // ---------- Render ----------
+  // ---------- Render: Tools ----------
 
   function render() {
     var filtered = getFiltered();
@@ -724,7 +1111,7 @@
     var footerCount = document.getElementById("footerCount");
 
     resultCount.innerHTML = "<strong>" + filtered.length + "</strong> de " + state.tools.length + " ferramentas";
-    footerCount.textContent = state.tools.length + " ferramentas catalogadas";
+    footerCount.textContent = state.tools.length + " ferramentas · " + state.systems.length + " sistemas";
 
     if (filtered.length === 0) {
       grid.style.display = "none";
@@ -769,11 +1156,11 @@
 
     setLogo(card.querySelector("[data-logo-holder]"), tool);
 
-    card.addEventListener("click", function () { openModal(tool); });
+    card.addEventListener("click", function () { openToolModal(tool); });
     card.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        openModal(tool);
+        openToolModal(tool);
       }
     });
 
@@ -817,9 +1204,144 @@
       .replace(/"/g, "&quot;");
   }
 
-  // ---------- Modal ----------
+  // ---------- Render: Systems ----------
 
-  function openModal(tool) {
+  function renderSystems() {
+    var container = document.getElementById("systemsContainer");
+    container.innerHTML = "";
+
+    var groups = {};
+    var order = [];
+    state.systems.forEach(function (sys) {
+      if (!groups[sys.company]) {
+        groups[sys.company] = { color: sys.companyColor, items: [] };
+        order.push(sys.company);
+      }
+      groups[sys.company].items.push(sys);
+    });
+
+    order.forEach(function (company) {
+      var group = groups[company];
+      var section = document.createElement("section");
+      section.className = "company-group";
+      section.innerHTML =
+        '<div class="company-heading">' +
+          '<span class="company-dot" style="background:' + escapeHtml(group.color) + '"></span>' +
+          "<h2>" + escapeHtml(company) + "</h2>" +
+          '<span class="company-count">' + group.items.length + (group.items.length === 1 ? " sistema" : " sistemas") + "</span>" +
+        "</div>" +
+        '<div class="systems-grid"></div>';
+      var grid = section.querySelector(".systems-grid");
+      group.items.forEach(function (sys) {
+        grid.appendChild(makeSystemCard(sys));
+      });
+      container.appendChild(section);
+    });
+  }
+
+  function makeSystemCard(sys) {
+    var card = document.createElement("div");
+    card.className = "system-card";
+    card.id = "system-" + sys.id;
+
+    var isWip = /desenvolvimento/i.test(sys.status);
+    var stackTools = (sys.toolIds || []).map(function (id) { return toolsById[id]; }).filter(Boolean);
+    var previewTools = stackTools.slice(0, 6);
+    var extraCount = stackTools.length - previewTools.length;
+
+    card.innerHTML =
+      '<div class="system-card-top">' +
+        "<div>" +
+          "<h3>" + escapeHtml(sys.name) + "</h3>" +
+          '<span class="system-status' + (isWip ? " wip" : "") + '">' + escapeHtml(sys.status) + "</span>" +
+        "</div>" +
+        '<button class="system-expand" aria-label="Expandir detalhes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      "</div>" +
+      '<p class="system-objective">' + escapeHtml(sys.objective) + "</p>" +
+      '<div class="system-stack-preview" data-preview></div>' +
+      '<div class="system-details">' +
+        '<div>' +
+          "<h4>Arquitetura</h4>" +
+          "<p>" + escapeHtml(sys.architecture) + "</p>" +
+        "</div>" +
+        '<div>' +
+          "<h4>Destaques da stack</h4>" +
+          '<ul class="highlight-list">' +
+            (sys.stackHighlights || []).map(function (h) { return "<li>" + escapeHtml(h) + "</li>"; }).join("") +
+          "</ul>" +
+        "</div>" +
+        '<div>' +
+          "<h4>Stack completa (" + stackTools.length + ")</h4>" +
+          '<div class="system-full-stack" data-full-stack></div>' +
+        "</div>" +
+        '<div class="system-repo-path">' + escapeHtml(sys.repoPath) + "</div>" +
+      "</div>";
+
+    var previewHolder = card.querySelector("[data-preview]");
+    previewTools.forEach(function (tool) {
+      previewHolder.appendChild(makeStackChip(tool));
+    });
+    if (extraCount > 0) {
+      var moreChip = document.createElement("span");
+      moreChip.className = "stack-chip more-chip";
+      moreChip.textContent = "+" + extraCount;
+      previewHolder.appendChild(moreChip);
+    }
+
+    var fullStackHolder = card.querySelector("[data-full-stack]");
+    stackTools.forEach(function (tool) {
+      fullStackHolder.appendChild(makeStackChip(tool));
+    });
+
+    card.querySelector(".system-expand").addEventListener("click", function (e) {
+      e.stopPropagation();
+      card.classList.toggle("expanded");
+    });
+
+    card.querySelector(".system-card-top h3").addEventListener("click", function () {
+      card.classList.toggle("expanded");
+    });
+    card.querySelector(".system-card-top h3").style.cursor = "pointer";
+
+    return card;
+  }
+
+  function makeStackChip(tool) {
+    var chip = document.createElement("span");
+    chip.className = "stack-chip";
+    chip.title = tool.name;
+
+    var iconHolder = document.createElement("span");
+    if (tool.logo) {
+      var img = document.createElement("img");
+      img.src = tool.logo;
+      img.alt = "";
+      img.loading = "lazy";
+      img.onerror = function () {
+        iconHolder.innerHTML = "";
+        iconHolder.className = "stack-chip-fallback";
+      };
+      iconHolder.appendChild(img);
+    } else {
+      iconHolder.className = "stack-chip-fallback";
+    }
+    chip.appendChild(iconHolder);
+
+    var label = document.createElement("span");
+    label.textContent = tool.name;
+    chip.appendChild(label);
+
+    chip.addEventListener("click", function (e) {
+      e.stopPropagation();
+      filterByTool(tool.id);
+    });
+
+    return chip;
+  }
+
+  // ---------- Modal: Tool detail ----------
+
+  function openToolModal(tool) {
     var overlay = document.getElementById("modalOverlay");
     var modal = document.getElementById("modal");
 
@@ -847,11 +1369,7 @@
       (projects.length ? (
         '<div class="modal-section">' +
           "<h4>Projetos onde aparece</h4>" +
-          '<div class="modal-projects">' +
-            projects.map(function (p) {
-              return '<span class="project-tag">' + escapeHtml(p) + "</span>";
-            }).join("") +
-          "</div>" +
+          '<div class="modal-projects" data-modal-projects></div>' +
         "</div>"
       ) : "") +
       (tool.link ? (
@@ -864,6 +1382,24 @@
 
     setLogo(modal.querySelector("[data-modal-logo]"), tool);
 
+    var projectsHolder = modal.querySelector("[data-modal-projects]");
+    if (projectsHolder) {
+      projects.forEach(function (p) {
+        var systemId = PROJECT_TO_SYSTEM[p];
+        var tag = document.createElement("span");
+        tag.className = "project-tag" + (systemId ? " linkable" : "");
+        tag.textContent = p;
+        if (systemId) {
+          tag.title = "Ver sistema " + p;
+          tag.addEventListener("click", function () {
+            closeModal();
+            goToSystem(systemId);
+          });
+        }
+        projectsHolder.appendChild(tag);
+      });
+    }
+
     overlay.classList.add("open");
     document.body.style.overflow = "hidden";
 
@@ -874,6 +1410,19 @@
     var overlay = document.getElementById("modalOverlay");
     overlay.classList.remove("open");
     document.body.style.overflow = "";
+  }
+
+  function goToSystem(systemId) {
+    setView("systems", { smooth: true });
+    setTimeout(function () {
+      var card = document.getElementById("system-" + systemId);
+      if (card) {
+        card.classList.add("expanded");
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.style.borderColor = "var(--accent)";
+        setTimeout(function () { card.style.borderColor = ""; }, 1600);
+      }
+    }, 80);
   }
 
   // ---------- Events ----------
@@ -904,8 +1453,9 @@
   // ---------- Init ----------
 
   initTheme();
+  initRouting();
   initEvents();
-  loadTools();
+  loadData();
 })();
 </script>
 

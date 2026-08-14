@@ -1,0 +1,161 @@
+[
+  {
+    "id": "portal-supertrans",
+    "name": "Portal Supertrans",
+    "company": "SuperTrans",
+    "companyColor": "#00526B",
+    "status": "Em produção",
+    "objective": "Plataforma web de gestão de transportes da SuperTrans: cadastro e acompanhamento de operações, vistorias de containers alugados, integrações com sistemas externos (Modallport para consulta de DI, Jira para cronograma) e um sistema próprio de permissões (Configurador) por módulo/página.",
+    "repoPath": "projetos/portal-supertrans",
+    "architecture": "Monorepo Turborepo + pnpm, com apps/api (NestJS) e apps/web (Next.js), packages compartilhados (auth, acl, config, database, types) e stack completa de observabilidade própria.",
+    "stackHighlights": [
+      "Next.js 15 (App Router) + React 19 no frontend",
+      "NestJS 10 com Repository Pattern SOLID na API",
+      "PostgreSQL + Prisma ORM",
+      "Redis (cache/real-time) + Socket.io",
+      "RabbitMQ (mensageria assíncrona, outbox pattern) + worker dedicado",
+      "MinIO (armazenamento de arquivos)",
+      "Better Auth (login local + SSO Microsoft Entra ID)",
+      "CASL (sistema de permissões)",
+      "GrowthBook self-hosted (feature flags)",
+      "Stack de observabilidade: Grafana, Prometheus, Loki, Tempo, Alloy, cAdvisor, Faro (RUM)",
+      "Traefik como reverse proxy em produção",
+      "Deploy via GitHub Actions → GHCR → VPS (Docker Compose)"
+    ],
+    "toolIds": ["typescript", "nodejs", "nextjs", "react", "nestjs", "postgresql", "prisma", "redis", "rabbitmq", "minio", "docker", "docker-compose", "traefik", "github-actions", "ghcr", "turborepo", "pnpm", "biome", "jest", "vitest", "playwright", "storybook", "tailwindcss", "base-ui", "zustand", "tanstack-query", "react-hook-form", "zod", "socketio", "sse", "better-auth", "microsoft-entra-id", "casl", "growthbook", "mongodb", "grafana", "prometheus", "loki", "grafana-alloy", "grafana-tempo", "grafana-faro", "opentelemetry", "cadvisor", "pino", "temporal", "keycloak", "tiptap", "xlsx", "swagger", "axios", "jira", "class-validator", "throttler", "claude-code"]
+  },
+  {
+    "id": "nucleo-portais",
+    "name": "Design System Orion (nucleo-portais)",
+    "company": "Grupo Orion",
+    "companyColor": "#29A699",
+    "status": "Em produção",
+    "objective": "Plataforma interna do grupo: design system compartilhado (tokens, primitives, blocks), Storybook oficial e documentação arquitetural — a base de UI usada pelos portais das diferentes empresas do grupo. Não contém produto, domínio de negócio ou dados reais — só a camada visual e de componentes reutilizável entre marcas.",
+    "repoPath": "projetos/nucleo-portais",
+    "architecture": "Monorepo Turborepo + pnpm com packages publicados no npm público sob o escopo @design-systems-orion (tokens, ui, blocks), além de apps/storybook (catálogo visual) e apps/docs (site de documentação Fumadocs, publicado no GitHub Pages).",
+    "stackHighlights": [
+      "React 19 + Base UI (headless primitives)",
+      "Tailwind CSS v4 (CSS-first, sem tailwind.config.ts)",
+      "cva + tailwind-merge para variantes de componentes",
+      "Storybook 10 com toolbar de alternância de marca (Supertrans/Aurora/Orion)",
+      "Changesets (versionamento semântico dos pacotes)",
+      "tsup (build ESM + .d.ts)",
+      "Chromatic (testes de regressão visual)",
+      "Fumadocs + Next.js (site de documentação)",
+      "Publicação: GitHub Actions → npm público + GitHub Pages"
+    ],
+    "toolIds": ["typescript", "nodejs", "nextjs", "react", "turborepo", "pnpm", "biome", "vitest", "playwright", "storybook", "chromatic", "tailwindcss", "base-ui", "github-actions", "github-pages", "changesets", "tsup", "fumadocs", "npm-registry", "claude-code"]
+  },
+  {
+    "id": "app-almoxarifado",
+    "name": "Almoxarifado",
+    "company": "Grupo Orion",
+    "companyColor": "#0F3D3E",
+    "status": "Em desenvolvimento (fundação técnica com dados simulados)",
+    "objective": "Aplicativo móvel para agilizar o atendimento de solicitações do almoxarifado e a baixa de produtos, permitindo executar pelo celular um fluxo que hoje exige o Protheus Web em um computador. O Protheus é a única fonte de verdade — o app não tem backend, banco ou API própria.",
+    "repoPath": "projetos/app-almoxarifado",
+    "architecture": "App Expo/React Native único (sem monorepo), com gateway de integração dupla (Mock/REST) para o Protheus, contratos Zod compartilhados entre as duas implementações.",
+    "stackHighlights": [
+      "Expo SDK 57 + React Native 0.86 + Expo Router",
+      "TypeScript em modo estrito",
+      "TanStack Query (estado assíncrono e cache)",
+      "Axios (cliente HTTP centralizado)",
+      "Zod (validação de env e contratos do Protheus)",
+      "React Hook Form",
+      "Zustand (estado de sessão/UI)",
+      "Expo SecureStore (token e dados de sessão)",
+      "Biome (única ferramenta de lint/format)",
+      "Jest + jest-expo + Testing Library",
+      "EAS Build/Update para builds e OTA"
+    ],
+    "toolIds": ["typescript", "nodejs", "react-native", "expo", "pnpm", "biome", "jest", "zustand", "tanstack-query", "react-hook-form", "zod", "axios", "protheus", "expo-application-services", "android-studio", "expo-secure-store", "claude-code"]
+  },
+  {
+    "id": "supertrans-app",
+    "name": "SuperTrans Vistorias",
+    "company": "SuperTrans",
+    "companyColor": "#00526B",
+    "status": "Em produção",
+    "objective": "Aplicativo mobile para vistoria de containers alugados da SuperTrans: checklist por lados/piso, fotos, assinatura e sincronização em tempo real com o painel web de vistorias do portal-supertrans. Consome diretamente a API do portal-supertrans.",
+    "repoPath": "projetos/supertrans-app",
+    "architecture": "App Expo/React Native único, offline-first, com stores dedicadas (auth, inspection) e adapters de sincronização isolados (InspectionSyncAdapter, InspectionMapper).",
+    "stackHighlights": [
+      "Expo SDK 56 + React Native 0.85 + Expo Router",
+      "NativeWind (Tailwind para React Native)",
+      "Zustand + AsyncStorage (estado offline-first)",
+      "React Hook Form + Zod",
+      "SSE via react-native-sse (tempo real, com fallback por polling)",
+      "Expo SecureStore",
+      "ESLint + Prettier",
+      "Vitest para testes",
+      "EAS Build/Update (binário nativo + OTA)"
+    ],
+    "toolIds": ["typescript", "nodejs", "react-native", "expo", "nativewind", "zustand", "react-hook-form", "zod", "sse", "expo-secure-store", "eslint", "prettier", "vitest", "expo-application-services", "claude-code"]
+  },
+  {
+    "id": "portal-fornecedor",
+    "name": "Portal Fornecedor",
+    "company": "Superterminais",
+    "companyColor": "#161618",
+    "status": "Em produção",
+    "objective": "Portal para gestão do relacionamento com fornecedores da Superterminais: fluxos de cadastro, documentos e permissões, com dados operacionais integrados ao ERP Protheus (SQL Server legado) além do banco PostgreSQL próprio da aplicação.",
+    "repoPath": "projetos/Portal_Fornecedor",
+    "architecture": "Backend NestJS + frontend Next.js separados (sem monorepo Turborepo), GitLab CI self-hosted com runner shell Windows/PowerShell para build e deploy via Docker Compose atrás de Traefik.",
+    "stackHighlights": [
+      "NestJS 11 + Prisma ORM (PostgreSQL) + mssql/tedious (SQL Server legado)",
+      "Next.js 15 + React 19 no frontend",
+      "Radix UI + Tailwind CSS v3",
+      "JWT + Passport.js + bcrypt (autenticação)",
+      "Swagger/OpenAPI (documentação da API)",
+      "MinIO (armazenamento de arquivos)",
+      "Chart.js, jsPDF, SheetJS/xlsx (relatórios e exportações)",
+      "Traefik (reverse proxy em produção)",
+      "GitLab CI (build, migração de banco e deploy manual)"
+    ],
+    "toolIds": ["typescript", "nodejs", "nestjs", "nextjs", "react", "postgresql", "prisma", "mssql", "minio", "docker", "docker-compose", "traefik", "gitlab-ci", "eslint", "prettier", "jest", "tailwindcss", "radix-ui", "tanstack-query", "passportjs", "jwt", "bcrypt", "chartjs", "xlsx", "jspdf", "swagger", "axios", "protheus", "class-validator"]
+  },
+  {
+    "id": "portal-aurora",
+    "name": "Portal Aurora",
+    "company": "Aurora EADI",
+    "companyColor": "#F97316",
+    "status": "Em produção",
+    "objective": "Portal operacional da Aurora EADI (nacionalização de carga e armazenagem): gestão de processos, sincronização com Active Directory corporativo, filas de processamento assíncrono e automações de notificação (WhatsApp) para clientes sobre agendamentos e atribuições.",
+    "repoPath": "projetos/Portal-Aurora",
+    "architecture": "Monorepo Turborepo + pnpm com apps/api (NestJS) e apps/web (Next.js), integração com SQL Server legado do Protheus, sincronização LDAP com Active Directory e automações via n8n acionadas por webhook.",
+    "stackHighlights": [
+      "NestJS 11 + Prisma ORM (PostgreSQL) + mssql/tedious (SQL Server legado)",
+      "Next.js 15 + React 19 no frontend",
+      "Radix UI + Tailwind CSS v3",
+      "LDAP/Active Directory (ldapts) — sincronização periódica de usuários",
+      "Bull (filas assíncronas sobre Redis) com shutdown gracioso",
+      "n8n (automação de notificações via WhatsApp)",
+      "JWT + Passport.js + bcrypt",
+      "Chart.js, jsPDF, SheetJS/xlsx",
+      "Traefik + GitLab CI (mesmo padrão de deploy do Portal Fornecedor)"
+    ],
+    "toolIds": ["typescript", "nodejs", "nestjs", "nextjs", "react", "postgresql", "prisma", "mssql", "minio", "docker", "docker-compose", "traefik", "gitlab-ci", "turborepo", "pnpm", "eslint", "prettier", "jest", "tailwindcss", "radix-ui", "tanstack-query", "passportjs", "jwt", "bcrypt", "ldap", "bull", "n8n", "chartjs", "xlsx", "jspdf", "swagger", "axios", "protheus", "class-validator"]
+  },
+  {
+    "id": "superfood",
+    "name": "Orionfood",
+    "company": "Grupo Orion",
+    "companyColor": "#29A699",
+    "status": "Em produção",
+    "objective": "Sistema de avaliação e gestão de refeitório corporativo: kiosk touch para avaliação anônima e rápida das refeições (≤10s), painel web para nutricionistas gerenciarem cardápios/métricas por empresa, e app mobile complementar. Atende as empresas do grupo com marcas configuráveis (SUPER/AURORA) no mesmo kiosk.",
+    "repoPath": "projetos/superfood",
+    "architecture": "Monorepo pnpm workspaces com apps/api (Fastify), apps/web (kiosk + painel admin, Vite) e apps/mobile (Expo). Deploy único via imagem Docker publicada no GHCR.",
+    "stackHighlights": [
+      "Fastify (API leve e performática)",
+      "Prisma ORM + PostgreSQL",
+      "React + Vite no frontend web (kiosk e painel)",
+      "Expo + React Native no app mobile",
+      "Resend (envio de emails transacionais)",
+      "MinIO (armazenamento de arquivos)",
+      "Recharts (gráficos de satisfação e tendências)",
+      "Design System Orion (@design-systems-orion/ui e blocks) no frontend web",
+      "Deploy: GitHub Actions → GHCR → VPS (Docker Compose, healthcheck)"
+    ],
+    "toolIds": ["typescript", "nodejs", "react", "react-native", "expo", "fastify", "postgresql", "prisma", "minio", "docker", "docker-compose", "github-actions", "ghcr", "pnpm", "vite", "recharts", "resend", "zustand", "zod", "xlsx", "claude-code"]
+  }
+]

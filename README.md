@@ -1,16 +1,25 @@
-# Orion Toolstack
+# Stack de Tecnologias Orion
 
 Catálogo estático das ferramentas, tecnologias e serviços usados nos projetos do grupo Orion (Superterminais, SuperTrans, Aurora EADI).
 
 Site publicado via GitHub Pages, sem backend, sem build step e sem dependências externas além dos ícones (Simple Icons via CDN).
 
+O site tem duas visões, alternadas por abas no topo (e por hash na URL, `#tools` / `#systems`):
+
+- **Ferramentas** — catálogo com busca e filtro por categoria (o que já existia).
+- **Sistemas** — os produtos do grupo agrupados por empresa, cada um com objetivo, arquitetura, destaques da stack e a lista completa de tecnologias usadas.
+
+As duas visões são cruzadas: clicar numa tecnologia dentro de um sistema leva para ela filtrada na visão Ferramentas; clicar numa tag de projeto no modal de uma ferramenta leva para o sistema correspondente, já expandido.
+
 ## Como funciona
 
 - `index.html` — página única (HTML + CSS + JS vanilla, sem framework).
-- `tools.json` — fonte de dados de todas as ferramentas catalogadas. É o único arquivo que precisa ser editado para atualizar o catálogo.
+- `tools.json` — fonte de dados de todas as ferramentas catalogadas (visão Ferramentas).
+- `systems.json` — fonte de dados dos sistemas/produtos do grupo (visão Sistemas): objetivo, empresa, arquitetura e `toolIds` (referencia os `id` de `tools.json`).
+- `assets/` — logo da Orion (`orion-logo.png` original enviado pelo usuário, `orion-mark.png` recortado só no ícone da esfera para uso no header/rodapé, `orion-favicon.png` para o favicon).
 - `.github/workflows/deploy.yml` — publica o conteúdo do repositório no GitHub Pages a cada push na branch `main`.
 
-Não há passo de build: o `index.html` carrega `tools.json` via `fetch()` em tempo de execução.
+Não há passo de build: o `index.html` carrega `tools.json` e `systems.json` via `fetch()` em tempo de execução.
 
 ## Como rodar localmente
 
@@ -53,6 +62,23 @@ Apague o objeto correspondente de `tools.json`.
 ### Logos que não carregam
 
 Se um logo não carregar (URL quebrada, ferramenta sem ícone público confiável), o card mostra automaticamente um placeholder com as iniciais do nome — não é necessário nenhum tratamento manual. Quando tiver um arquivo de logo para enviar manualmente, salve-o em uma pasta `assets/logos/` (crie se não existir) e aponte o campo `logo` para o caminho relativo, ex. `"logo": "assets/logos/minha-ferramenta.svg"`.
+
+## Como atualizar a página de Sistemas
+
+1. Abra `systems.json`.
+2. Cada sistema é um objeto com os campos:
+   - `id` — identificador único, kebab-case (usado para deep-link e scroll ao vir do catálogo de ferramentas).
+   - `name` — nome de exibição do sistema/produto.
+   - `company` — empresa responsável (Superterminais, SuperTrans, Aurora EADI ou Grupo Orion quando é uma plataforma interna sem dono único). Sistemas da mesma empresa são agrupados visualmente.
+   - `companyColor` — cor do indicador (bolinha) ao lado do nome da empresa. Pode reaproveitar a cor de marca do tema correspondente em `nucleo-portais/packages/tokens/src/themes/`.
+   - `status` — texto livre, ex. `"Em produção"` ou `"Em desenvolvimento (...)"`. Qualquer status contendo a palavra "desenvolvimento" usa o indicador laranja (em vez do teal) automaticamente.
+   - `objective` — o que o sistema faz e por quê, em 2-4 frases.
+   - `repoPath` — caminho do repositório dentro de `projetos/`.
+   - `architecture` — 1-2 frases sobre a organização do código (monorepo ou não, apps, packages).
+   - `stackHighlights` — lista de frases curtas com os pontos mais relevantes da stack (aparece como lista com marcadores ao expandir o card).
+   - `toolIds` — lista de `id`s que existem em `tools.json`. É o que popula os chips de tecnologia (preview + lista completa) e permite o cross-link para a visão Ferramentas.
+3. Ao adicionar um novo sistema, garanta que todo `id` em `toolIds` já exista em `tools.json` — não há validação automática, um id inválido só falha silenciosamente (o chip não aparece).
+4. Para que o cross-link "tag de projeto → sistema" funcione a partir do modal de uma ferramenta, adicione o nome de pasta do projeto (o mesmo usado no campo `projects` de `tools.json`) ao mapa `PROJECT_TO_SYSTEM` dentro do `<script>` de `index.html`.
 
 ## Publicação (GitHub Pages)
 
