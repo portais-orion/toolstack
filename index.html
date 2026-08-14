@@ -98,6 +98,7 @@
         </div>
 
         <div class="rail-mobile" id="railM"></div>
+        <div class="layer-pills-row" id="layerPills"></div>
         <div class="meta-line" id="meta"></div>
         <div class="grid" id="grid"></div>
       </div>
@@ -127,6 +128,8 @@
       <p>Visão lado a lado das tecnologias utilizadas em cada produto do grupo, organizadas por categoria arquitetural para identificar padrões e sinergias.</p>
     </div>
 
+    <div id="stackHealth"></div>
+
     <div class="matrix-insights" id="matrixInsights"></div>
 
     <div class="matrix-toolbar">
@@ -142,9 +145,14 @@
         <button role="tab" data-mview="cards" aria-selected="true">Por Categoria</button>
         <button role="tab" data-mview="compare" aria-selected="false">Comparar Sistemas</button>
         <button role="tab" data-mview="table" aria-selected="false">Tabela</button>
+        <button role="tab" data-mview="graph" aria-selected="false">Grafo</button>
       </div>
 
       <div class="export-actions">
+        <button class="export-btn" id="exportCsvBtn" aria-label="Exportar para CSV">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Exportar .CSV</span>
+        </button>
         <button class="export-btn" id="exportMdBtn" aria-label="Exportar para Markdown">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           <span>Exportar .MD</span>
@@ -181,6 +189,21 @@
 
     <!-- Mode 3: Traditional Wide Table -->
     <div class="matrix-wrap" id="matrixWrap" style="display:none;"></div>
+
+    <!-- Mode 4: Network Graph -->
+    <div class="matrix-graph-wrap" id="matrixGraphWrap" style="display:none;">
+      <div class="graph-toolbar">
+        <div class="graph-legend" id="graphLegend"></div>
+        <button class="graph-reset-btn" id="graphResetBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Resetar layout
+        </button>
+      </div>
+      <div class="graph-canvas-wrap" id="graphCanvasWrap">
+        <svg id="graphSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="graph-tooltip" id="graphTooltip"></div>
+      </div>
+    </div>
   </div>
 </section>
 

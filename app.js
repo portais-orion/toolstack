@@ -7,13 +7,15 @@
     byId: {},
     q: "",
     cat: "Todas",
+    layer: "Todas",
     sort: "use",
     view: "tools",
     sysCompany: "Todas",
     toolCompany: "Todas",
     matrixMode: "cards",
     palIdx: 0,
-    palRows: []
+    palRows: [],
+    statsAnimated: false
   };
 
   var PROJ2SYS = {
@@ -88,6 +90,24 @@
     }
   }
 
+  // Maps layer name to its CSS custom property value
+  var LAYER_COLORS = {
+    "Frontend":                 "var(--layer-frontend)",
+    "Backend":                  "var(--layer-backend)",
+    "Mobile":                   "var(--layer-mobile)",
+    "Database":                 "var(--layer-database)",
+    "DevOps & Infra":           "var(--layer-devops)",
+    "Observabilidade":          "var(--layer-obs)",
+    "Autenticação & Segurança": "var(--layer-auth)",
+    "Testes & QA":              "var(--layer-qa)",
+    "Utilitários":              "var(--layer-utils)",
+    "Inteligência Artificial":  "var(--layer-ai)"
+  };
+
+  function layerCSSVar(layer) {
+    return LAYER_COLORS[layer] || "var(--text-faint)";
+  }
+
   /* ---------------- data ---------------- */
 
   Promise.all([
@@ -106,9 +126,11 @@
 
     buildStats();
     buildRail();
+    buildLayerPills();
     renderTools();
     renderSystems();
     renderMatrix();
+    buildStackHealth();
     bind();
     route(true);
   }).catch(function (e) {
@@ -134,6 +156,9 @@
     }).join("");
     document.getElementById("ftrCount").textContent =
       S.tools.length + " ferramentas · " + S.systems.length + " sistemas";
+
+    // Animate stats counters on first view
+    setTimeout(animateStats, 150);
   }
 
   /* ---------------- rail ---------------- */
@@ -190,6 +215,7 @@
     var q = norm(S.q.trim());
     var out = S.tools.filter(function (t) {
       if (S.cat !== "Todas" && t.category !== S.cat) return false;
+      if (S.layer !== "Todas" && t.layer !== S.layer) return false;
       if (S.toolCompany && S.toolCompany !== "Todas") {
         var inCompany = (t._sys || []).some(function (sysId) {
           var sysObj = S.systems.find(function (s) { return s.id === sysId; });
@@ -198,8 +224,8 @@
         if (!inCompany) return false;
       }
       if (!q) return true;
-      var haystack = norm(t.name + " " + t.category + " " + t.description + " " + t.usage + " " +
-        (t.projects || []).join(" "));
+      var haystack = norm(t.name + " " + t.category + " " + (t.layer || "") + " " + t.description + " " + t.usage + " " +
+        (t.projects || []).join(" ") + " " + (t.tags || []).join(" "));
       return haystack.indexOf(q) !== -1;
     });
     out.sort(function (a, b) {
@@ -252,6 +278,10 @@
     el.style.animationDelay = Math.min(i * 11, 260) + "ms";
 
     var n = (t.projects || []).length;
+    var layerColor = layerCSSVar(t.layer);
+    var layerBadge = t.layer
+      ? '<span class="t-layer-badge" style="--layer-color:' + layerColor + '">' + esc(t.layer) + '</span>'
+      : '';
 
     el.innerHTML =
       '<div class="t-head">' +
@@ -264,6 +294,7 @@
       '<p class="t-desc">' + esc(t.description) + "</p>" +
       '<div class="t-foot">' +
         '<span class="t-use"><b>' + n + "</b> " + (n === 1 ? "sistema" : "sistemas") + "</span>" +
+        layerBadge +
         '<span class="pips">' + pips(t) + "</span>" +
       "</div>";
 
@@ -580,19 +611,26 @@
   function setMatrixMode(mode) {
     S.matrixMode = mode;
     var cardsGrid = document.getElementById("matrixCardsGrid");
-    var compWrap = document.getElementById("matrixCompareWrap");
+    var compWrap  = document.getElementById("matrixCompareWrap");
     var tableWrap = document.getElementById("matrixWrap");
+    var graphWrap = document.getElementById("matrixGraphWrap");
 
-    if (cardsGrid) cardsGrid.style.display = mode === "cards" ? "grid" : "none";
-    if (compWrap) compWrap.style.display = mode === "compare" ? "flex" : "none";
-    if (tableWrap) tableWrap.style.display = mode === "table" ? "block" : "none";
+    if (cardsGrid) cardsGrid.style.display = mode === "cards"   ? "grid"  : "none";
+    if (compWrap)  compWrap.style.display  = mode === "compare" ? "flex"  : "none";
+    if (tableWrap) tableWrap.style.display = mode === "table"   ? "block" : "none";
+    if (graphWrap) graphWrap.style.display = mode === "graph"   ? "flex"  : "none";
 
     Array.prototype.forEach.call(document.querySelectorAll("#matrixViewSwitch button"), function (b) {
       b.setAttribute("aria-selected", String(b.dataset.mview === mode));
     });
 
-    if (mode === "cards") renderMatrixCards();
+    if (mode === "cards")   renderMatrixCards();
     else if (mode === "compare") renderMatrixCompare();
+    else if (mode === "graph") {
+      // Lazy init — only build if the SVG is empty
+      var svgEl = document.getElementById("graphSvg");
+      if (svgEl && !svgEl.childNodes.length) buildNetworkGraph();
+    }
   }
 
   function renderMatrixCards() {
@@ -1176,6 +1214,576 @@
     }
   }
 
+  /* ============================================================
+     Layer Pills
+     ============================================================ */
+
+  function buildLayerPills() {
+    var host = document.getElementById("layerPills");
+    if (!host) return;
+    host.innerHTML = "";
+
+    var layers = [];
+    S.tools.forEach(function (t) {
+      if (t.layer && layers.indexOf(t.layer) === -1) layers.push(t.layer);
+    });
+    layers.sort(function (a, b) { return a.localeCompare(b, "pt"); });
+
+    var allLayers = ["Todas"].concat(layers);
+    allLayers.forEach(function (layerName) {
+      var pill = document.createElement("button");
+      pill.className = "layer-pill";
+      pill.setAttribute("aria-pressed", String(S.layer === layerName));
+      var color = LAYER_COLORS[layerName] || "";
+      if (color) pill.style.setProperty("--layer-color", color);
+
+      pill.innerHTML =
+        (layerName !== "Todas" ? '<span class="layer-pill-dot"></span>' : "") +
+        esc(layerName);
+
+      pill.onclick = function () {
+        S.layer = layerName;
+        Array.prototype.forEach.call(host.querySelectorAll(".layer-pill"), function (p) {
+          p.setAttribute("aria-pressed", String(p === pill));
+        });
+        renderTools();
+      };
+      host.appendChild(pill);
+    });
+  }
+
+  /* ============================================================
+     Stats Counter Animation
+     ============================================================ */
+
+  function animateStats() {
+    if (S.statsAnimated) return;
+    S.statsAnimated = true;
+    var els = document.querySelectorAll(".stat-n");
+    Array.prototype.forEach.call(els, function (el) {
+      var target = parseInt(el.textContent, 10);
+      if (isNaN(target) || target < 2) return;
+      var start = 0;
+      var duration = 600;
+      var startTime = null;
+      function step(now) {
+        if (!startTime) startTime = now;
+        var progress = Math.min((now - startTime) / duration, 1);
+        // ease-out cubic
+        var eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + (target - start) * eased);
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* ============================================================
+     Stack Health & Drift
+     ============================================================ */
+
+  function buildStackHealth() {
+    var host = document.getElementById("stackHealth");
+    if (!host) return;
+
+    var cards = [];
+
+    // --- 1. Core tools (used in 4+ projects = "core" of the group)
+    var core = S.tools.filter(function (t) { return (t.projects || []).length >= 4; });
+    cards.push({
+      signal: "green",
+      title: "Ferramentas Core do Grupo",
+      desc: core.length + " tecnologias adotadas em 4+ projetos, formando o núcleo estável do stack.",
+      detail: core.slice(0, 6).map(function (t) { return t.name; }).join(", ") + (core.length > 6 ? "…" : "")
+    });
+
+    // --- 2. Linting fragmentation: Biome vs ESLint+Prettier
+    var hasBiome = S.tools.find(function (t) { return t.id === "biome"; });
+    var hasEslint = S.tools.find(function (t) { return t.id === "eslint"; });
+    var bioProjs = hasBiome ? (hasBiome.projects || []).length : 0;
+    var eslProjs = hasEslint ? (hasEslint.projects || []).length : 0;
+    if (hasBiome && hasEslint) {
+      cards.push({
+        signal: "yellow",
+        title: "Fragmentação: Lint & Formato",
+        desc: "Biome (" + bioProjs + " proj.) e ESLint+Prettier (" + eslProjs + " proj.) coexistem. " +
+              "Considerar migração gradual para Biome como padrão único.",
+        detail: "Biome: portal-supertrans, nucleo-portais, app-almoxarifado · ESLint: portais legacy"
+      });
+    }
+
+    // --- 3. Auth fragmentation: Better Auth vs Passport+JWT
+    var hasBetterAuth = S.tools.find(function (t) { return t.id === "better-auth"; });
+    var hasPassport   = S.tools.find(function (t) { return t.id === "passportjs"; });
+    if (hasBetterAuth && hasPassport) {
+      cards.push({
+        signal: "yellow",
+        title: "Fragmentação: Autenticação",
+        desc: "Dois padrões de autenticação ativos: Better Auth (portal-supertrans, moderno, TypeScript-first) " +
+              "e Passport.js + JWT (Portal_Fornecedor, Portal-Aurora, legado).",
+        detail: "Oportunidade de unificação na próxima iteração dos portais legacy"
+      });
+    }
+
+    // --- 4. CI/CD fragmentation: GitHub Actions vs GitLab CI
+    var hasGHA = S.tools.find(function (t) { return t.id === "github-actions"; });
+    var hasGlab = S.tools.find(function (t) { return t.id === "gitlab-ci"; });
+    if (hasGHA && hasGlab) {
+      cards.push({
+        signal: "yellow",
+        title: "Fragmentação: CI/CD",
+        desc: "GitHub Actions (projetos públicos) e GitLab CI self-hosted (portais corporativos) em uso simultâneo. " +
+              "Convivência intencional por restrição de rede.",
+        detail: "GitHub Actions: portal-supertrans, superfood · GitLab CI: Portal_Fornecedor, Portal-Aurora"
+      });
+    }
+
+    // --- 5. Tailwind version divergence
+    var twTool = S.tools.find(function (t) { return t.id === "tailwindcss"; });
+    if (twTool && twTool.projects && twTool.projects.length >= 4) {
+      cards.push({
+        signal: "yellow",
+        title: "Divergência: Tailwind CSS v3 vs v4",
+        desc: "portal-supertrans e nucleo-portais usam Tailwind v4 (CSS-first, sem config TS). " +
+              "Portal_Fornecedor e Portal-Aurora usam Tailwind v3. Migração gradual planejada.",
+        detail: "v4: portal-supertrans, nucleo-portais · v3: Portal_Fornecedor, Portal-Aurora"
+      });
+    }
+
+    // --- 6. TypeScript adoption (positive)
+    var tsProjs = (S.tools.find(function (t) { return t.id === "typescript"; }) || {}).projects || [];
+    if (tsProjs.length >= 6) {
+      cards.push({
+        signal: "green",
+        title: "TypeScript: Adoção Total",
+        desc: "TypeScript em modo estrito é a linguagem principal em todos os " + tsProjs.length +
+              " projetos ativos do grupo. Zero projetos JavaScript puro.",
+        detail: "100% de cobertura — frontend, backend, mobile e design system"
+      });
+    }
+
+    // --- 7. Observability: only one project has full stack
+    var obsTools = S.tools.filter(function (t) { return t.layer === "Observabilidade"; });
+    var obsOnlyOne = obsTools.every(function (t) { return (t.projects || []).length === 1; });
+    if (obsOnlyOne && obsTools.length > 3) {
+      cards.push({
+        signal: "red",
+        title: "Observabilidade: Concentrada",
+        desc: "Stack completa (Grafana, Prometheus, Loki, Alloy, Faro, OTel) presente apenas em " +
+              "portal-supertrans. Os demais sistemas carecem de instrumentação.",
+        detail: "Oportunidade: expandir ao menos métricas básicas (prom-client) para outros projetos"
+      });
+    }
+
+    // Render
+    var signalLabel = { green: "✓ Padronizado", yellow: "⚠ Fragmentado", red: "✗ Atenção" };
+    host.innerHTML =
+      '<div class="stack-health">' +
+        '<div class="stack-health-h">' +
+          '<div class="stack-health-icon">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+              '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' +
+            '</svg>' +
+          '</div>' +
+          '<span class="stack-health-title">Stack Health &amp; Drift</span>' +
+          '<span class="stack-health-sub">Análise computada automaticamente · ' + cards.length + ' insights</span>' +
+        '</div>' +
+        '<div class="health-grid">' +
+          cards.map(function (c) {
+            return '<div class="health-card">' +
+              '<div class="health-signal ' + c.signal + '" title="' + signalLabel[c.signal] + '"></div>' +
+              '<div class="health-card-body">' +
+                '<div class="health-card-title">' + esc(c.title) + '</div>' +
+                '<div class="health-card-desc">' + esc(c.desc) + '</div>' +
+                (c.detail ? '<div class="health-card-detail">' + esc(c.detail) + '</div>' : '') +
+              '</div>' +
+            '</div>';
+          }).join("") +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ============================================================
+     Network Graph (Force-Directed SVG)
+     ============================================================ */
+
+  var graphSim = null; // simulation handle
+
+  function buildNetworkGraph() {
+    var host = document.getElementById("graphSvg");
+    if (!host) return;
+
+    // Only show tools used in 2+ systems by default
+    var filteredTools = S.tools.filter(function (t) { return (t._sys || []).length >= 2; });
+
+    // Build nodes
+    var nodes = [];
+    var nodeMap = {};
+
+    S.systems.forEach(function (s) {
+      var n = { id: "sys:" + s.id, label: s.name, type: "system", data: s, x: 0, y: 0, vx: 0, vy: 0, pinned: false };
+      nodes.push(n);
+      nodeMap[n.id] = n;
+    });
+
+    filteredTools.forEach(function (t) {
+      var n = { id: "tool:" + t.id, label: t.name, type: "tool", data: t, x: 0, y: 0, vx: 0, vy: 0, pinned: false };
+      nodes.push(n);
+      nodeMap[n.id] = n;
+    });
+
+    // Build edges
+    var edges = [];
+    filteredTools.forEach(function (t) {
+      (t._sys || []).forEach(function (sysId) {
+        var src = nodeMap["tool:" + t.id];
+        var tgt = nodeMap["sys:" + sysId];
+        if (src && tgt) edges.push({ src: src, tgt: tgt });
+      });
+    });
+
+    // Initialize positions — systems in a circle, tools scattered
+    var W = 900, H = 500;
+    var cx = W / 2, cy = H / 2;
+    var sysNodes = nodes.filter(function (n) { return n.type === "system"; });
+    var toolNodes = nodes.filter(function (n) { return n.type === "tool"; });
+
+    sysNodes.forEach(function (n, i) {
+      var angle = (i / sysNodes.length) * Math.PI * 2 - Math.PI / 2;
+      n.x = cx + Math.cos(angle) * 180;
+      n.y = cy + Math.sin(angle) * 160;
+    });
+    toolNodes.forEach(function (n, i) {
+      var angle = (i / toolNodes.length) * Math.PI * 2;
+      n.x = cx + Math.cos(angle) * 320 + (Math.random() - 0.5) * 60;
+      n.y = cy + Math.sin(angle) * 260 + (Math.random() - 0.5) * 60;
+    });
+
+    renderGraph(host, nodes, edges, W, H);
+
+    // Legend
+    var legend = document.getElementById("graphLegend");
+    if (legend) {
+      legend.innerHTML =
+        '<div class="graph-legend-item"><div class="graph-legend-ring" style="color:var(--accent)"></div><span>Sistema</span></div>' +
+        '<div class="graph-legend-item"><div class="graph-legend-dot" style="background:var(--text-muted)"></div><span>Ferramenta (2+ sistemas)</span></div>' +
+        '<div class="graph-legend-item" style="margin-left:6px;font-size:11px;opacity:.7">Clique para abrir · Arraste para mover</div>';
+    }
+
+    var resetBtn = document.getElementById("graphResetBtn");
+    if (resetBtn) {
+      resetBtn.onclick = function () { buildNetworkGraph(); };
+    }
+  }
+
+  function renderGraph(svg, nodes, edges, W, H) {
+    svg.innerHTML = "";
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    var NS = "http://www.w3.org/2000/svg";
+
+    // Defs (arrowhead)
+    var defs = document.createElementNS(NS, "defs");
+    var marker = document.createElementNS(NS, "marker");
+    marker.setAttribute("id", "arrowhead");
+    marker.setAttribute("markerWidth", "6");
+    marker.setAttribute("markerHeight", "6");
+    marker.setAttribute("refX", "3");
+    marker.setAttribute("refY", "3");
+    marker.setAttribute("orient", "auto");
+    var poly = document.createElementNS(NS, "polygon");
+    poly.setAttribute("points", "0 0, 6 3, 0 6");
+    poly.setAttribute("fill", "var(--border-strong)");
+    marker.appendChild(poly);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    // Edge layer
+    var edgeGroup = document.createElementNS(NS, "g");
+    edgeGroup.setAttribute("class", "g-edges");
+
+    var edgeEls = edges.map(function (e) {
+      var line = document.createElementNS(NS, "line");
+      line.setAttribute("stroke", "var(--border-strong)");
+      line.setAttribute("stroke-width", "1");
+      line.setAttribute("stroke-opacity", "0.6");
+      edgeGroup.appendChild(line);
+      return { el: line, src: e.src, tgt: e.tgt };
+    });
+    svg.appendChild(edgeGroup);
+
+    // Node layer
+    var nodeGroup = document.createElementNS(NS, "g");
+    nodeGroup.setAttribute("class", "g-nodes");
+
+    var tooltip = document.getElementById("graphTooltip");
+    var wrap = document.getElementById("graphCanvasWrap");
+
+    var nodeEls = nodes.map(function (n) {
+      var g = document.createElementNS(NS, "g");
+      g.setAttribute("class", "g-node");
+      g.style.cursor = "pointer";
+
+      var isSystem = n.type === "system";
+      var r = isSystem ? 18 : 7;
+
+      var circle = document.createElementNS(NS, "circle");
+      circle.setAttribute("r", String(r));
+      circle.setAttribute("stroke-width", isSystem ? "2.5" : "1.5");
+
+      if (isSystem) {
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", n.data.companyColor || "var(--accent)");
+        // inner fill
+        var innerFill = document.createElementNS(NS, "circle");
+        innerFill.setAttribute("r", String(r - 2));
+        innerFill.setAttribute("fill", n.data.companyColor || "var(--accent)");
+        innerFill.setAttribute("fill-opacity", "0.15");
+        g.appendChild(innerFill);
+      } else {
+        var h = hue(n.label);
+        circle.setAttribute("fill", "hsl(" + h + " 55% 62% / 0.9)");
+        circle.setAttribute("stroke", "hsl(" + h + " 40% 50%)");
+      }
+      g.appendChild(circle);
+
+      if (isSystem) {
+        var lbl = document.createElementNS(NS, "text");
+        lbl.setAttribute("text-anchor", "middle");
+        lbl.setAttribute("dy", String(r + 13));
+        lbl.setAttribute("fill", "var(--text-muted)");
+        lbl.setAttribute("font-size", "9");
+        lbl.setAttribute("font-family", "Inter, sans-serif");
+        lbl.textContent = n.label.length > 14 ? n.label.slice(0, 13) + "…" : n.label;
+        g.appendChild(lbl);
+      }
+
+      nodeGroup.appendChild(g);
+
+      // Hover tooltip
+      g.addEventListener("mouseenter", function (ev) {
+        if (!tooltip || !wrap) return;
+        var rect = wrap.getBoundingClientRect();
+        tooltip.innerHTML = '<div>' + esc(n.label) + '</div>' +
+          '<div class="graph-tooltip-sub">' +
+          (n.type === "system"
+            ? n.data.company
+            : ((n.data._sys || []).length + " sistemas · " + (n.data.layer || n.data.category))) +
+          '</div>';
+        tooltip.style.left = (ev.clientX - rect.left + 12) + "px";
+        tooltip.style.top  = (ev.clientY - rect.top + 12) + "px";
+        tooltip.classList.add("visible");
+        // fade non-neighbors
+        var neighbors = new Set();
+        edgeEls.forEach(function (e) {
+          if (e.src === n || e.tgt === n) {
+            neighbors.add(e.src);
+            neighbors.add(e.tgt);
+          }
+        });
+        nodeEls.forEach(function (ne) {
+          ne.g.style.opacity = (neighbors.has(ne.n) || ne.n === n) ? "1" : "0.15";
+        });
+        edgeEls.forEach(function (e) {
+          e.el.style.opacity = (e.src === n || e.tgt === n) ? "1" : "0.1";
+        });
+      });
+
+      g.addEventListener("mousemove", function (ev) {
+        if (!tooltip || !wrap) return;
+        var rect = wrap.getBoundingClientRect();
+        tooltip.style.left = (ev.clientX - rect.left + 12) + "px";
+        tooltip.style.top  = (ev.clientY - rect.top + 12) + "px";
+      });
+
+      g.addEventListener("mouseleave", function () {
+        if (tooltip) tooltip.classList.remove("visible");
+        nodeEls.forEach(function (ne) { ne.g.style.opacity = "1"; });
+        edgeEls.forEach(function (e) { e.el.style.opacity = "1"; });
+      });
+
+      // Click
+      g.addEventListener("click", function () {
+        if (n.type === "system") {
+          closeAll();
+          jumpToSystem(n.data.id);
+        } else {
+          openTool(n.data);
+        }
+      });
+
+      // Drag
+      var dragging = false, dragOffX = 0, dragOffY = 0;
+      g.addEventListener("mousedown", function (ev) {
+        dragging = true;
+        n.pinned = true;
+        var ctm = svg.getScreenCTM();
+        dragOffX = (ev.clientX - ctm.e) / ctm.a - n.x;
+        dragOffY = (ev.clientY - ctm.f) / ctm.d - n.y;
+        ev.preventDefault();
+      });
+      window.addEventListener("mousemove", function (ev) {
+        if (!dragging) return;
+        var ctm = svg.getScreenCTM();
+        n.x = (ev.clientX - ctm.e) / ctm.a - dragOffX;
+        n.y = (ev.clientY - ctm.f) / ctm.d - dragOffY;
+        n.vx = 0; n.vy = 0;
+      });
+      window.addEventListener("mouseup", function () {
+        if (dragging) { dragging = false; n.pinned = false; }
+      });
+
+      return { g: g, circle: circle, n: n };
+    });
+
+    svg.appendChild(nodeGroup);
+
+    // Force-directed physics simulation
+    var alpha = 1.0;
+    var alphaDecay = 0.025;
+    var idealLen = 120;
+    var repK = 4000;
+
+    function tick() {
+      if (alpha < 0.005) return;
+      alpha *= (1 - alphaDecay);
+
+      // repulsion between all nodes
+      for (var i = 0; i < nodes.length; i++) {
+        for (var j = i + 1; j < nodes.length; j++) {
+          var a = nodes[i], b = nodes[j];
+          var dx = b.x - a.x, dy = b.y - a.y;
+          var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          var f = (repK / (dist * dist)) * alpha;
+          var fx = (dx / dist) * f, fy = (dy / dist) * f;
+          if (!a.pinned) { a.vx -= fx; a.vy -= fy; }
+          if (!b.pinned) { b.vx += fx; b.vy += fy; }
+        }
+      }
+
+      // attraction along edges
+      edges.forEach(function (e) {
+        var dx = e.tgt.x - e.src.x, dy = e.tgt.y - e.src.y;
+        var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        var f = ((dist - idealLen) / dist) * 0.12 * alpha;
+        var fx = dx * f, fy = dy * f;
+        if (!e.src.pinned) { e.src.vx += fx; e.src.vy += fy; }
+        if (!e.tgt.pinned) { e.tgt.vx -= fx; e.tgt.vy -= fy; }
+      });
+
+      // gravity toward center
+      nodes.forEach(function (n) {
+        if (!n.pinned) {
+          n.vx += (cx - n.x) * 0.008 * alpha;
+          n.vy += (cy - n.y) * 0.008 * alpha;
+        }
+      });
+
+      // integrate
+      var damping = 0.82;
+      nodes.forEach(function (n) {
+        if (n.pinned) return;
+        n.vx *= damping; n.vy *= damping;
+        n.x += n.vx; n.y += n.vy;
+        // boundary
+        n.x = Math.max(20, Math.min(W - 20, n.x));
+        n.y = Math.max(20, Math.min(H - 20, n.y));
+      });
+
+      // update DOM
+      nodeEls.forEach(function (ne) {
+        ne.g.setAttribute("transform", "translate(" + ne.n.x + "," + ne.n.y + ")");
+      });
+      edgeEls.forEach(function (e) {
+        e.el.setAttribute("x1", String(e.src.x));
+        e.el.setAttribute("y1", String(e.src.y));
+        e.el.setAttribute("x2", String(e.tgt.x));
+        e.el.setAttribute("y2", String(e.tgt.y));
+      });
+
+      requestAnimationFrame(tick);
+    }
+
+    // initial positions
+    nodeEls.forEach(function (ne) {
+      ne.g.setAttribute("transform", "translate(" + ne.n.x + "," + ne.n.y + ")");
+    });
+
+    var cx = W / 2, cy = H / 2;
+    requestAnimationFrame(tick);
+  }
+
+  /* ============================================================
+     CSV Export
+     ============================================================ */
+
+  function exportCSV() {
+    var rows = ["name,category,layer,version,description,usage,systems,tags,link"];
+    S.tools.forEach(function (t) {
+      function q(v) {
+        var s = (v || "").toString().replace(/"/g, '""');
+        return '"' + s + '"';
+      }
+      rows.push([
+        q(t.name),
+        q(t.category),
+        q(t.layer || ""),
+        q(t.version || ""),
+        q(t.description),
+        q(t.usage),
+        q((t._sys || []).join(";")),
+        q((t.tags || []).join(";")),
+        q(t.link || "")
+      ].join(","));
+    });
+    downloadFile("catalogo-tecnologias-orion.csv", rows.join("\n"), "text/csv;charset=utf-8");
+  }
+
+  /* ============================================================
+     Card Hover Tilt (3D perspective)
+     ============================================================ */
+
+  function bindCardTilt() {
+    // Respect reduced motion preference
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var grid = document.getElementById("grid");
+    if (!grid) return;
+
+    grid.addEventListener("mousemove", function (e) {
+      var card = e.target.closest(".t-card");
+      if (!card) return;
+      var rect = card.getBoundingClientRect();
+      var relX = (e.clientX - rect.left) / rect.width  - 0.5; // -0.5 … 0.5
+      var relY = (e.clientY - rect.top)  / rect.height - 0.5;
+      var rx = (-relY * 5).toFixed(2) + "deg";
+      var ry = ( relX * 5).toFixed(2) + "deg";
+      card.style.setProperty("--rx", rx);
+      card.style.setProperty("--ry", ry);
+      card.classList.add("tilting");
+    });
+
+    grid.addEventListener("mouseleave", function (e) {
+      var card = e.target.closest(".t-card");
+      if (!card) return;
+      card.classList.remove("tilting");
+      card.style.removeProperty("--rx");
+      card.style.removeProperty("--ry");
+    }, true);
+
+    // Also handle when mouse leaves individual card
+    grid.addEventListener("mouseout", function (e) {
+      var card = e.target.closest(".t-card");
+      if (!card) return;
+      if (!card.contains(e.relatedTarget)) {
+        card.classList.remove("tilting");
+        card.style.removeProperty("--rx");
+        card.style.removeProperty("--ry");
+      }
+    });
+  }
+
   /* ---------------- events ---------------- */
 
   function bind() {
@@ -1244,6 +1852,9 @@
       }
     }
 
+    var expCsv = document.getElementById("exportCsvBtn");
+    if (expCsv) expCsv.onclick = exportCSV;
+
     var expMd = document.getElementById("exportMdBtn");
     if (expMd) expMd.onclick = exportMarkdown;
 
@@ -1253,6 +1864,8 @@
     Array.prototype.forEach.call(document.querySelectorAll("#matrixViewSwitch button"), function (b) {
       b.onclick = function () { setMatrixMode(b.dataset.mview); };
     });
+
+    bindCardTilt();
 
     document.addEventListener("keydown", function (e) {
       var palOpen = document.getElementById("pal").classList.contains("on");
