@@ -3,6 +3,9 @@ name: Deploy static content to Pages
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
   workflow_dispatch:
 
 permissions:
@@ -23,12 +26,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        
+      - name: Build / Prepare Dist
+        run: |
+          mkdir dist
+          cp index.html dist/
+          cp styles.css dist/
+          cp app.js dist/
+          cp systems.json dist/
+          cp tools.json dist/
+          cp -r assets/ dist/
+          cp .nojekyll dist/ || true
+          
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: './dist'
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
