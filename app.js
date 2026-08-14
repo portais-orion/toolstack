@@ -1604,7 +1604,8 @@
       });
 
       // Click
-      g.addEventListener("click", function () {
+      g.addEventListener("click", function (ev) {
+        if (ev.defaultPrevented) return; // skip if it was a drag
         if (n.type === "system") {
           closeAll();
           jumpToSystem(n.data.id);
@@ -1614,39 +1615,68 @@
       });
 
       // Drag
-      var dragging = false, dragOffX = 0, dragOffY = 0;
       g.addEventListener("mousedown", function (ev) {
-        dragging = true;
+        activeDragNode = n;
         n.pinned = true;
         var ctm = svg.getScreenCTM();
         dragOffX = (ev.clientX - ctm.e) / ctm.a - n.x;
         dragOffY = (ev.clientY - ctm.f) / ctm.d - n.y;
+        alpha = Math.max(alpha, 0.3);
+        if (typeof simRunning !== 'undefined' && !simRunning) requestAnimationFrame(tick);
         ev.preventDefault();
-      });
-      window.addEventListener("mousemove", function (ev) {
-        if (!dragging) return;
-        var ctm = svg.getScreenCTM();
-        n.x = (ev.clientX - ctm.e) / ctm.a - dragOffX;
-        n.y = (ev.clientY - ctm.f) / ctm.d - dragOffY;
-        n.vx = 0; n.vy = 0;
-      });
-      window.addEventListener("mouseup", function () {
-        if (dragging) { dragging = false; n.pinned = false; }
       });
 
       return { g: g, circle: circle, n: n };
+    });
+
+    var activeDragNode = null;
+    var dragOffX = 0, dragOffY = 0;
+    var dragged = false;
+    var simRunning = true;
+
+    window.addEventListener("mousemove", function (ev) {
+      if (!activeDragNode) return;
+      dragged = true;
+      var ctm = svg.getScreenCTM();
+      activeDragNode.x = (ev.clientX - ctm.e) / ctm.a - dragOffX;
+      activeDragNode.y = (ev.clientY - ctm.f) / ctm.d - dragOffY;
+      activeDragNode.vx = 0; activeDragNode.vy = 0;
+      alpha = Math.max(alpha, 0.3); // keep physics active while dragging
+      if (!simRunning) requestAnimationFrame(tick);
+    });
+    
+    window.addEventListener("mouseup", function (ev) {
+      if (activeDragNode) {
+        if (dragged) {
+          // Prevent the click event from firing on the node if we dragged it
+          ev.preventDefault();
+          // We need a small timeout because the click event fires after mouseup
+          setTimeout(function() { dragged = false; }, 0);
+          
+          // Dispatch a fake click event on the SVG to stop propagation of the real click
+          var fakeClick = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+          fakeClick.preventDefault();
+          ev.target.dispatchEvent(fakeClick);
+        }
+        activeDragNode.pinned = false;
+        activeDragNode = null;
+      }
     });
 
     svg.appendChild(nodeGroup);
 
     // Force-directed physics simulation
     var alpha = 1.0;
-    var alphaDecay = 0.025;
-    var idealLen = 120;
-    var repK = 4000;
+    var alphaDecay = 0.015; // Slower decay = longer simulation
+    var idealLen = 140; // slightly longer edges
+    var repK = 3500; // slightly softer repulsion
 
     function tick() {
-      if (alpha < 0.005) return;
+      if (alpha < 0.005) {
+        simRunning = false;
+        return; 
+      }
+      simRunning = true;
       alpha *= (1 - alphaDecay);
 
       // repulsion between all nodes
@@ -1666,7 +1696,7 @@
       edges.forEach(function (e) {
         var dx = e.tgt.x - e.src.x, dy = e.tgt.y - e.src.y;
         var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        var f = ((dist - idealLen) / dist) * 0.12 * alpha;
+        var f = ((dist - idealLen) / dist) * 0.15 * alpha;
         var fx = dx * f, fy = dy * f;
         if (!e.src.pinned) { e.src.vx += fx; e.src.vy += fy; }
         if (!e.tgt.pinned) { e.tgt.vx -= fx; e.tgt.vy -= fy; }
@@ -1675,13 +1705,13 @@
       // gravity toward center
       nodes.forEach(function (n) {
         if (!n.pinned) {
-          n.vx += (cx - n.x) * 0.008 * alpha;
-          n.vy += (cy - n.y) * 0.008 * alpha;
+          n.vx += (cx - n.x) * 0.01 * alpha;
+          n.vy += (cy - n.y) * 0.01 * alpha;
         }
       });
 
       // integrate
-      var damping = 0.82;
+      var damping = 0.85; // Less damping = more wobbly/malleable
       nodes.forEach(function (n) {
         if (n.pinned) return;
         n.vx *= damping; n.vy *= damping;
