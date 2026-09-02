@@ -23,10 +23,12 @@ function run() {
   const toolsPath = path.join(__dirname, "tools.json");
   const systemsPath = path.join(__dirname, "systems.json");
   const skillsPath = path.join(__dirname, "orion-skills.json");
+  const guidePath = path.join(__dirname, "orion-skills-guide.json");
 
   let tools = [];
   let systems = [];
   let skills = [];
+  let guide = {};
 
   // 1. Parse tools.json
   try {
@@ -61,13 +63,24 @@ function run() {
     errors.push(`Failed to parse orion-skills.json: ${err.message}`);
   }
 
+  // 4. Parse Orion Agent Skills guide
+  try {
+    const rawGuide = fs.readFileSync(guidePath, "utf8");
+    guide = JSON.parse(rawGuide);
+    if (!guide || Array.isArray(guide) || typeof guide !== "object") {
+      errors.push("orion-skills-guide.json must contain an object.");
+    }
+  } catch (err) {
+    errors.push(`Failed to parse orion-skills-guide.json: ${err.message}`);
+  }
+
   if (errors.length > 0) {
     console.error("❌ Fatal JSON syntax errors:");
     errors.forEach((e) => console.error(`  - ${e}`));
     process.exit(1);
   }
 
-  // 4. Validate tools
+  // 5. Validate tools
   const toolIds = new Set();
   tools.forEach((tool, index) => {
     const pos = `tools.json[${index}] (${tool.name || "unnamed"})`;
@@ -121,7 +134,7 @@ function run() {
     }
   });
 
-  // 5. Validate systems
+  // 6. Validate systems
   const systemIds = new Set();
   systems.forEach((sys, index) => {
     const pos = `systems.json[${index}] (${sys.name || "unnamed"})`;
@@ -161,7 +174,7 @@ function run() {
     }
   });
 
-  // 6. Validate Orion Agent Skills
+  // 7. Validate Orion Agent Skills
   const skillNames = new Set();
   skills.forEach((skill, index) => {
     const pos = `orion-skills.json[${index}] (${skill.name || "unnamed"})`;
@@ -177,6 +190,43 @@ function run() {
     if (!skill.description) errors.push(`${pos} is missing required field 'description'.`);
   });
 
+  // 8. Validate Orion Agent Skills guide
+  ["intro", "prerequisites", "sources", "commands", "promptExamples", "troubleshooting", "faq"].forEach((field) => {
+    if (guide[field] === undefined) errors.push(`orion-skills-guide.json is missing required field '${field}'.`);
+  });
+  if (typeof guide.intro !== "string" || !guide.intro.trim()) {
+    errors.push("orion-skills-guide.json field 'intro' must be a non-empty string.");
+  }
+  ["prerequisites", "sources", "commands", "promptExamples", "troubleshooting", "faq"].forEach((field) => {
+    if (guide[field] !== undefined && !Array.isArray(guide[field])) {
+      errors.push(`orion-skills-guide.json field '${field}' must be an array.`);
+    }
+  });
+  const guideCommands = new Set();
+  (guide.commands || []).forEach((command, index) => {
+    const pos = `orion-skills-guide.json.commands[${index}]`;
+    if (!command || typeof command !== "object") {
+      errors.push(`${pos} must be an object.`);
+      return;
+    }
+    ["command", "label", "description"].forEach((field) => {
+      if (typeof command[field] !== "string" || !command[field].trim()) errors.push(`${pos} is missing required field '${field}'.`);
+    });
+    if (command.command && guideCommands.has(command.command)) errors.push(`Duplicate guide command '${command.command}'.`);
+    if (command.command) guideCommands.add(command.command);
+  });
+  (guide.sources || []).forEach((source, index) => {
+    const pos = `orion-skills-guide.json.sources[${index}]`;
+    ["name", "repo", "description"].forEach((field) => {
+      if (!source || typeof source[field] !== "string" || !source[field].trim()) errors.push(`${pos} is missing required field '${field}'.`);
+    });
+  });
+  (guide.promptExamples || []).forEach((example, index) => {
+    const pos = `orion-skills-guide.json.promptExamples[${index}]`;
+    if (!example || typeof example.prompt !== "string" || !example.prompt.trim()) errors.push(`${pos} is missing required field 'prompt'.`);
+    if (!example || typeof example.skill !== "string" || !skillNames.has(example.skill)) errors.push(`${pos} references unknown skill '${example && example.skill ? example.skill : ""}'.`);
+  });
+
   // Report
   const layerCoverage = tools.filter((t) => t.layer).length;
   const versionCoverage = tools.filter((t) => t.version).length;
@@ -185,6 +235,8 @@ function run() {
   console.log(`  - Tools: ${tools.length}`);
   console.log(`  - Systems: ${systems.length}`);
   console.log(`  - Orion Agent Skills: ${skills.length}`);
+  console.log(`  - Guide sections: 7`);
+  console.log(`  - Guide commands: ${(guide.commands || []).length}`);
   console.log(`  - Tools with 'layer': ${layerCoverage}/${tools.length}`);
   console.log(`  - Tools with 'version': ${versionCoverage}/${tools.length}\n`);
 

@@ -1,0 +1,121 @@
+{
+  "intro": "O instalador Orion prepara, com um único comando, o ambiente padrão de Agent Skills para Claude Code e Codex.",
+  "prerequisites": [
+    "Node.js 18.17 ou superior",
+    "Git",
+    "Acesso via gh, SSH ou credential helper ao repositório privado da Orion",
+    "Claude Code e/ou Codex para consumir as skills instaladas"
+  ],
+  "sources": [
+    {
+      "name": "Orion Agent Skills",
+      "repo": "portais-orion/orion-agent-skills",
+      "description": "Skills internas do Grupo Orion: Design System Orion, padrões NestJS/Prisma e procedimentos compartilhados."
+    },
+    {
+      "name": "Matt Pocock",
+      "repo": "mattpocock/skills",
+      "description": "Kit de engenharia para debugging, TDD, code review, specs, tickets e triage."
+    },
+    {
+      "name": "Superpowers",
+      "repo": "obra/superpowers",
+      "description": "Skills complementares de engenharia e workflow."
+    }
+  ],
+  "commands": [
+    {
+      "command": "npx @portais-orion/skills@latest",
+      "label": "Instalar padrão",
+      "description": "Instala globalmente todas as fontes habilitadas para Claude Code e Codex."
+    },
+    {
+      "command": "npx @portais-orion/skills@latest install",
+      "label": "Instalar explicitamente",
+      "description": "Executa a instalação global do registry Orion."
+    },
+    {
+      "command": "npx @portais-orion/skills@latest update",
+      "label": "Atualizar",
+      "description": "Atualiza as skills globais usando o CLI oficial skills."
+    },
+    {
+      "command": "npx @portais-orion/skills@latest list",
+      "label": "Listar",
+      "description": "Mostra as skills instaladas agrupadas por fonte."
+    },
+    {
+      "command": "npx @portais-orion/skills@latest list --json",
+      "label": "Listar em JSON",
+      "description": "Exibe o catálogo instalado em formato JSON."
+    },
+    {
+      "command": "npx @portais-orion/skills@latest sources",
+      "label": "Ver fontes",
+      "description": "Lista fontes, repositórios, prioridades, agentes e exclusões do registry."
+    },
+    {
+      "command": "npx @portais-orion/skills@latest doctor",
+      "label": "Diagnosticar",
+      "description": "Verifica Node, Git, CLI skills, autenticação, agentes instalados e diretórios globais."
+    }
+  ],
+  "promptExamples": [
+    {
+      "prompt": "Audite este repositório seguindo os padrões Orion.",
+      "skill": "audit-orion-codebase"
+    },
+    {
+      "prompt": "Revise a segurança desse backend.",
+      "skill": "orion-security"
+    },
+    {
+      "prompt": "Analise logs, métricas e tracing deste sistema.",
+      "skill": "orion-observability"
+    },
+    {
+      "prompt": "Preciso alterar esse schema Prisma corretamente.",
+      "skill": "prisma-schema-change"
+    },
+    {
+      "prompt": "Migre essa tela para o Design System Orion.",
+      "skill": "orion-design-system-adoption"
+    }
+  ],
+  "troubleshooting": [
+    {
+      "problem": "Node ou Git não encontrado",
+      "resolution": "Instale Node.js 18.17+ e Git, depois rode o comando doctor novamente."
+    },
+    {
+      "problem": "Falha ao acessar a fonte privada Orion",
+      "resolution": "Configure autenticação Git/GitHub por credential helper, gh, SSH ou GITHUB_TOKEN/GH_TOKEN."
+    },
+    {
+      "problem": "Claude Code ou Codex não detectado",
+      "resolution": "A instalação não depende dos agentes; instale o agente desejado para que ele carregue as skills globais."
+    },
+    {
+      "problem": "Skills desatualizadas",
+      "resolution": "Execute npx @portais-orion/skills@latest update."
+    }
+  ],
+  "faq": [
+    {
+      "question": "Preciso instalar em cada projeto?",
+      "answer": "Não. A instalação é global por usuário; depois, abra Claude Code ou Codex dentro de qualquer projeto."
+    },
+    {
+      "question": "Preciso decorar os 26 nomes?",
+      "answer": "Não. Descreva a tarefa normalmente; o agente usa o contexto para selecionar a skill relevante."
+    },
+    {
+      "question": "O instalador copia as skills externas para a Orion?",
+      "answer": "Não. Matt Pocock e Superpowers são consumidos diretamente de seus repositórios upstream pelo CLI oficial."
+    },
+    {
+      "question": "A instalação pede token da Orion?",
+      "answer": "Não como primeira opção. O CLI reutiliza a autenticação Git/GitHub já configurada no ambiente."
+    }
+  ]
+}
