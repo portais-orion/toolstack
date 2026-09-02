@@ -137,7 +137,6 @@ renderTools();
     renderSystems();
     renderMatrix();
     renderSkills();
-    renderBrève();
     renderSkillsGuide();
     buildStackHealth();
     bind();
@@ -1016,28 +1015,6 @@ renderTools();
     });
 }
 
-  function renderBrève() {
-    var grid = document.getElementById("grid-brève");
-    var meta = document.getElementById("meta-brève");
-
-    meta.innerHTML = "<b>Em desenvolvimento</b> - boilerplate/starter template para nucleo-portais";
-
-    grid.innerHTML =
-      '<div class="empty">' +
-        '<div class="empty-i"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>' +
-        "<h3>Breve em breve</h3>" +
-        "<p>Fique ligado! Em breve teremos o boilerplate/starter template do nucleo-portais disponível.</p>" +
-        "<p>O projeto estará pronto em breve com:</p>" +
-        "<ul>" +
-          "<li>Scaffold via CLI: `pnpm create nucleo-portal`</li>" +
-          "<li>Backend: NestJS com ApplicationRegistry, guards, repositories</li>" +
-          "<li>Frontend: Route groups, auth, permissions, TanStack Query</li>" +
-          "<li>Packages: auth, config, types, database com seed</li>" +
-          "<li>Makefile, CI, gerador de feature module</li>" +
-        "</ul>" +
-      "</div>";
-  }
-
   function guideBlock(title, content) {
     var block = document.createElement("section");
     block.className = "guide-section";
@@ -1154,9 +1131,6 @@ function setView(v, opts) {
     }
     var vSkillsGuide = document.getElementById("skillsGuideView");
     if (vSkillsGuide) vSkillsGuide.classList.toggle("on", v === "skills-guide");
-    var vBrève = document.getElementById("v-brève");
-    if (vBrève) vBrève.classList.toggle("on", v === "brève");
-    if (vBrève && v === "brève") renderBrève();
     Array.prototype.forEach.call(document.querySelectorAll(".hdr .seg button"), function (b) {
       b.setAttribute("aria-selected", String(b.dataset.view === (v === "skills-guide" ? "skills" : v)));
     });
@@ -1195,7 +1169,8 @@ function setView(v, opts) {
       setView("skills", { keepHash: true, instant: instant, noScroll: instant });
     } else if (raw === "brève" || raw === "breve") {
       closeSheets();
-      setView("brève", { keepHash: true, instant: instant, noScroll: instant });
+      history.replaceState(null, "", "#skills/guia");
+      setView("skills-guide", { keepHash: true, instant: instant, noScroll: instant });
     } else {
       closeSheets();
       setView(raw === "systems" ? "systems" : "tools", { keepHash: true, instant: instant, noScroll: instant });

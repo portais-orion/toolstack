@@ -40,3 +40,13 @@ test("Skills uses in-page tabs instead of hero action buttons", () => {
   assert.ok(html.includes("skillsGuideTab"), "missing guide tab");
   assert.ok(!html.includes("installSkillsBtn"), "old install CTA still present");
 });
+
+test("legacy breve route redirects to the Skills guide", () => {
+  const html = fs.readFileSync("index.html", "utf8");
+  const app = fs.readFileSync("app.js", "utf8");
+  assert.ok(!html.includes('data-view="breve"'), "placeholder breve tab should not be present");
+  assert.ok(!html.includes('id="v-breve"'), "placeholder breve view should not be present");
+  assert.ok(app.includes('raw === "brève" || raw === "breve"'), "legacy breve hash should still be accepted");
+  assert.ok(app.includes('history.replaceState(null, "", "#skills/guia")'), "legacy route should canonicalize to the guide");
+  assert.ok(app.includes('setView("skills-guide"'), "legacy route should activate the Skills guide");
+});
