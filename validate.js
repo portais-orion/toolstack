@@ -22,9 +22,11 @@ function run() {
 
   const toolsPath = path.join(__dirname, "tools.json");
   const systemsPath = path.join(__dirname, "systems.json");
+  const skillsPath = path.join(__dirname, "orion-skills.json");
 
   let tools = [];
   let systems = [];
+  let skills = [];
 
   // 1. Parse tools.json
   try {
@@ -48,13 +50,24 @@ function run() {
     errors.push(`Failed to parse systems.json: ${err.message}`);
   }
 
+  // 3. Parse Orion Agent Skills
+  try {
+    const rawSkills = fs.readFileSync(skillsPath, "utf8");
+    skills = JSON.parse(rawSkills);
+    if (!Array.isArray(skills)) {
+      errors.push("orion-skills.json must contain an array of objects.");
+    }
+  } catch (err) {
+    errors.push(`Failed to parse orion-skills.json: ${err.message}`);
+  }
+
   if (errors.length > 0) {
     console.error("❌ Fatal JSON syntax errors:");
     errors.forEach((e) => console.error(`  - ${e}`));
     process.exit(1);
   }
 
-  // 3. Validate tools
+  // 4. Validate tools
   const toolIds = new Set();
   tools.forEach((tool, index) => {
     const pos = `tools.json[${index}] (${tool.name || "unnamed"})`;
@@ -108,7 +121,7 @@ function run() {
     }
   });
 
-  // 4. Validate systems
+  // 5. Validate systems
   const systemIds = new Set();
   systems.forEach((sys, index) => {
     const pos = `systems.json[${index}] (${sys.name || "unnamed"})`;
@@ -148,6 +161,22 @@ function run() {
     }
   });
 
+  // 6. Validate Orion Agent Skills
+  const skillNames = new Set();
+  skills.forEach((skill, index) => {
+    const pos = `orion-skills.json[${index}] (${skill.name || "unnamed"})`;
+
+    if (!skill.category) errors.push(`${pos} is missing required field 'category'.`);
+    if (!skill.name) {
+      errors.push(`${pos} is missing required field 'name'.`);
+    } else if (skillNames.has(skill.name)) {
+      errors.push(`Duplicate skill name '${skill.name}' found at ${pos}.`);
+    } else {
+      skillNames.add(skill.name);
+    }
+    if (!skill.description) errors.push(`${pos} is missing required field 'description'.`);
+  });
+
   // Report
   const layerCoverage = tools.filter((t) => t.layer).length;
   const versionCoverage = tools.filter((t) => t.version).length;
@@ -155,6 +184,7 @@ function run() {
   console.log(`📊 Statistics:`);
   console.log(`  - Tools: ${tools.length}`);
   console.log(`  - Systems: ${systems.length}`);
+  console.log(`  - Orion Agent Skills: ${skills.length}`);
   console.log(`  - Tools with 'layer': ${layerCoverage}/${tools.length}`);
   console.log(`  - Tools with 'version': ${versionCoverage}/${tools.length}\n`);
 

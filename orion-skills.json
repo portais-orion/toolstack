@@ -1,0 +1,132 @@
+[
+  {
+    "category": "backend",
+    "name": "audit-trail-pattern",
+    "description": "Use ao adicionar rastreabilidade de \"quem fez o quê\" para uma mutação crítica — aprovação de documento, alteração de permissão, operação administrativa. Cobre o padrão de duas camadas de auditoria observado em mais de um sistema do grupo."
+  },
+  {
+    "category": "backend",
+    "name": "jwt-refresh-token-pattern",
+    "description": "Use ao trabalhar com autenticação JWT access+refresh token via interceptors Axios num backend NestJS + frontend Next.js/React. Cobre três armadilhas conhecidas que quebram silenciosamente o fluxo de refresh automático."
+  },
+  {
+    "category": "backend",
+    "name": "nestjs-prisma-patterns",
+    "description": "Use ao criar ou alterar um módulo, endpoint ou regra de negócio num backend NestJS + Prisma do grupo Orion. Cobre estrutura de módulo, convenções de DTO/validação e o checklist de padrões que um code review deve cobrir neste stack."
+  },
+  {
+    "category": "backend",
+    "name": "permission-catalog-pattern",
+    "description": "Use ao implementar ou alterar um catálogo de permissões granular por módulo/funcionalidade/usuário. Cobre dois modelos de implementação observados no grupo — manifesto versionado em código e tabelas relacionais — e o procedimento comum a ambos."
+  },
+  {
+    "category": "backend",
+    "name": "prisma-schema-change",
+    "description": "Use ao adicionar, remover, renomear ou alterar models, campos, relations, constraints, índices, enums ou migrations num schema Prisma. Aplica-se a qualquer sistema do grupo Orion que use Prisma."
+  },
+  {
+    "category": "backend",
+    "name": "rabbitmq-outbox-worker-pattern",
+    "description": "Use ao criar consumidores de fila, jobs assíncronos ou clientes HTTP resilientes num sistema com mensageria RabbitMQ e workers em background. Cobre o padrão Outbox, separação de processos e resiliência a falha."
+  },
+  {
+    "category": "design-system-orion",
+    "name": "new-portal",
+    "description": "Use ao criar um projeto React NOVO que vai consumir o Design System Orion (@design-systems-orion — tokens/ui/blocks) desde o início, com Next.js App Router ou Vite, Tailwind v4, tema por data-brand e adaptadores locais. Não use para migrar telas de um portal já existente (use orion-design-system-adoption)."
+  },
+  {
+    "category": "design-system-orion",
+    "name": "orion-design-system-adoption",
+    "description": "Use para migrar gradualmente uma tela de uma aplicação React existente (Next.js ou Vite) de shadcn/Radix, MUI, Chakra ou biblioteca interna para o Design System Orion (@design-systems-orion), preservando contratos de negócio, APIs, permissões e layout. Não use para redesign completo, migração em massa de uma vez, ou mudança simultânea de auth/permissões/backend/UI."
+  },
+  {
+    "category": "design-system-orion",
+    "name": "orion-design-system-guardian",
+    "description": "Use para criar, revisar ou aprovar qualquer tela, componente, tabela ou modal CRUD num portal que já adotou o Design System Orion (@design-systems-orion). Guardião das regras de uso — não confundir com a skill de adoção gradual, que cobre a migração inicial."
+  },
+  {
+    "category": "frontend",
+    "name": "nextjs-app-router-patterns",
+    "description": "Use ao criar ou alterar uma página/tela num portal Next.js (App Router) do grupo Orion. Cobre convenções de Server Component, registro de rota espelhado front/back, guards de permissão e integração com feature flags."
+  },
+  {
+    "category": "mobile",
+    "name": "expo-react-native-patterns",
+    "description": "Use ao trabalhar em qualquer app Expo/React Native do grupo Orion — convenções de qualidade de código, acessibilidade e testes observadas em mais de um app do grupo. Não cobre segurança (ver mobile-security-baseline) nem mutações críticas (ver idempotent-critical-mutation)."
+  },
+  {
+    "category": "mobile",
+    "name": "idempotent-critical-mutation",
+    "description": "Use ao implementar uma ação irreversível e crítica numa UI — aprovação de documento, baixa de estoque, faturamento, ou qualquer mutação financeira/operacional que não pode ser refeita sem consequência. Cobre como lidar com duplo toque, timeout e retry sem duplicar o efeito."
+  },
+  {
+    "category": "mobile",
+    "name": "mobile-security-baseline",
+    "description": "Use ao lidar com autenticação, tokens, dados sensíveis ou logging num app Expo/React Native do grupo Orion. Checklist de segurança mobile básica que se aplica a qualquer app do grupo, independente do produto."
+  },
+  {
+    "category": "orion",
+    "name": "audit-orion-codebase",
+    "description": "Use quando for necessário auditar um repositório Orion de forma read-only, selecionar auditores especializados, consolidar findings e gerar artefatos em pt-BR."
+  },
+  {
+    "category": "orion",
+    "name": "orion-architecture",
+    "description": "Use quando for necessário avaliar arquitetura Orion, boundaries, direção de dependências, modularidade, domínio e contratos estruturais sem modificar o projeto."
+  },
+  {
+    "category": "orion",
+    "name": "orion-engineering-experience",
+    "description": "Use quando for necessário avaliar documentação, onboarding, ownership, ADRs, runbooks, Developer Experience ou descoberta por agentes em repositório Orion sem modificar o projeto."
+  },
+  {
+    "category": "orion",
+    "name": "orion-frontend",
+    "description": "Use quando for necessário avaliar frontend Orion, Design System, acessibilidade, UX ou contratos do cliente sem modificar o projeto; não usar em backend-only."
+  },
+  {
+    "category": "orion",
+    "name": "orion-observability",
+    "description": "Use quando for necessário avaliar logs, métricas, tracing, health, confiabilidade, retries, timeouts, idempotência ou filas de sistema Orion sem modificar o projeto."
+  },
+  {
+    "category": "orion",
+    "name": "orion-platform",
+    "description": "Use quando for necessário avaliar Docker, Compose, configuração, CI/CD, deployment, release ou mecânica de infraestrutura Orion sem modificar o projeto."
+  },
+  {
+    "category": "orion",
+    "name": "orion-quality",
+    "description": "Use quando for necessário avaliar qualidade de engenharia Orion, complexidade, duplicação, tipagem, testes e fluxos críticos sem modificar o projeto."
+  },
+  {
+    "category": "orion",
+    "name": "orion-security",
+    "description": "Use quando for necessário auditar autenticação, autorização, secrets, validação, privacidade técnica, OWASP ou supply chain de sistema Orion sem modificar o projeto."
+  },
+  {
+    "category": "platform",
+    "name": "feature-flags-growthbook-pattern",
+    "description": "Use ao envelopar uma funcionalidade nova atrás de feature flag, criar um kill switch, ou planejar rollout gradual/dark launch num sistema que use GrowthBook (ou padrão equivalente de feature flags). Cobre nomenclatura, fallback seguro e ciclo de vida da flag."
+  },
+  {
+    "category": "platform",
+    "name": "feature-lifecycle-orchestrator-pattern",
+    "description": "Use ao estruturar como um agente principal orquestra múltiplos especialistas de camada (domínio, dados, backend, frontend, review, QA) para implementar uma feature ponta a ponta num monorepo. Padrão arquitetural de orquestração multi-agente, não um catálogo de agentes específicos de um produto."
+  },
+  {
+    "category": "platform",
+    "name": "knowledge-graph-first-navigation",
+    "description": "Use em qualquer repositório grande do grupo que tenha um grafo de conhecimento gerado (ex: via graphify) — consultar o grafo antes de grep manual/leitura exaustiva de arquivos para perguntas de arquitetura ou navegação de código."
+  },
+  {
+    "category": "platform",
+    "name": "observability-otel-lgtm-pattern",
+    "description": "Use ao instrumentar tracing, RUM (real user monitoring), métricas ou logs estruturados num sistema que adote OpenTelemetry + a stack LGTM (Loki/Grafana/Tempo/Mimir ou Prometheus). Cobre os quatro pilares e as regras de segurança/performance da instrumentação."
+  },
+  {
+    "category": "platform",
+    "name": "pre-deploy-check",
+    "description": "Use antes de fazer push para a branch principal ou disparar um deploy — verifica que o build que o CI vai rodar realmente vai passar, pegando erros de TypeScript antes de chegarem ao pipeline. Aplica-se a qualquer repositório do grupo com pipeline Docker + CI."
+  }
+]

@@ -4,6 +4,7 @@
   var S = {
     tools: [],
     systems: [],
+    skills: [],
     byId: {},
     q: "",
     cat: "Todas",
@@ -112,10 +113,12 @@
 
   Promise.all([
     fetch("tools.json").then(function (r) { return r.json(); }),
-    fetch("systems.json").then(function (r) { return r.json(); })
+    fetch("systems.json").then(function (r) { return r.json(); }),
+    fetch("orion-skills.json").then(function (r) { return r.json(); })
   ]).then(function (r) {
     S.tools = r[0];
     S.systems = r[1];
+    S.skills = r[2];
     S.tools.forEach(function (t) { S.byId[t.id] = t; });
     S.sysIds = S.systems.map(function (s) { return s.id; });
 
@@ -130,12 +133,13 @@
     renderTools();
     renderSystems();
     renderMatrix();
+    renderSkills();
     buildStackHealth();
     bind();
     route(true);
   }).catch(function (e) {
     document.getElementById("grid").innerHTML =
-      '<div class="empty"><h3>Erro ao carregar</h3><p>Não foi possível ler tools.json / systems.json.</p></div>';
+      '<div class="empty"><h3>Erro ao carregar</h3><p>Não foi possível ler os dados do catálogo.</p></div>';
     console.error(e);
   });
 
@@ -942,6 +946,64 @@
     setMatrixMode(S.matrixMode || "cards");
   }
 
+  /* ---------------- Orion Agent Skills ---------------- */
+
+  var SKILL_CATEGORY_LABELS = {
+    "backend": "Back-end",
+    "design-system-orion": "Design System Orion",
+    "frontend": "Front-end",
+    "mobile": "Mobile",
+    "orion": "Auditoria Orion",
+    "platform": "Plataforma"
+  };
+
+  function renderSkills() {
+    var host = document.getElementById("skillsGroups");
+    var meta = document.getElementById("skillsMeta");
+    var count = document.getElementById("skillsCount");
+    var input = document.getElementById("skillsQ");
+    if (!host || !meta || !count) return;
+
+    var query = norm(input ? input.value.trim() : "");
+    var list = S.skills.filter(function (skill) {
+      return !query || norm(skill.name + " " + skill.category + " " + skill.description).indexOf(query) !== -1;
+    });
+    var groups = {};
+    list.forEach(function (skill) {
+      (groups[skill.category] = groups[skill.category] || []).push(skill);
+    });
+
+    count.textContent = S.skills.length + " skills próprias";
+    meta.innerHTML = "<b>" + list.length + "</b> " + (list.length === 1 ? "skill encontrada" : "skills encontradas");
+    host.innerHTML = "";
+
+    if (!list.length) {
+      host.innerHTML = '<div class="empty"><h3>Nenhuma skill encontrada</h3><p>Tente outro termo de busca.</p></div>';
+      return;
+    }
+
+    Object.keys(groups).sort(function (a, b) {
+      return (SKILL_CATEGORY_LABELS[a] || a).localeCompare(SKILL_CATEGORY_LABELS[b] || b, "pt");
+    }).forEach(function (category) {
+      var section = document.createElement("section");
+      section.className = "skills-group";
+      section.innerHTML = '<div class="skills-group-head"><h2>' + esc(SKILL_CATEGORY_LABELS[category] || category) + '</h2><span>' + groups[category].length + '</span></div>';
+
+      var grid = document.createElement("div");
+      grid.className = "skills-grid";
+      groups[category].sort(function (a, b) { return a.name.localeCompare(b.name, "pt"); }).forEach(function (skill) {
+        var card = document.createElement("article");
+        card.className = "skill-card";
+        card.innerHTML = '<div class="skill-card-icon">✦</div><div><h3></h3><p></p></div>';
+        card.querySelector("h3").textContent = skill.name;
+        card.querySelector("p").textContent = skill.description;
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      host.appendChild(section);
+    });
+  }
+
   /* ---------------- navigation ---------------- */
 
   function setView(v, opts) {
@@ -951,7 +1013,9 @@
     document.getElementById("v-systems").classList.toggle("on", v === "systems");
     var vMatrix = document.getElementById("v-matrix");
     if (vMatrix) vMatrix.classList.toggle("on", v === "matrix");
-    Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (b) {
+    var vSkills = document.getElementById("v-skills");
+    if (vSkills) vSkills.classList.toggle("on", v === "skills");
+    Array.prototype.forEach.call(document.querySelectorAll(".hdr .seg button"), function (b) {
       b.setAttribute("aria-selected", String(b.dataset.view === v));
     });
     if (!opts.keepHash) history.replaceState(null, "", "#" + v);
@@ -973,6 +1037,9 @@
     } else if (raw === "matrix" || raw === "matriz") {
       closeSheets();
       setView("matrix", { keepHash: true, instant: instant, noScroll: instant });
+    } else if (raw === "skills") {
+      closeSheets();
+      setView("skills", { keepHash: true, instant: instant, noScroll: instant });
     } else {
       closeSheets();
       setView(raw === "systems" ? "systems" : "tools", { keepHash: true, instant: instant, noScroll: instant });
@@ -1824,7 +1891,7 @@
       try { localStorage.setItem("orion-theme", next); } catch (e) {}
     };
 
-    Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".hdr .seg button"), function (b) {
       b.onclick = function () { setView(b.dataset.view); };
     });
 
@@ -1849,6 +1916,24 @@
     document.getElementById("qClear").onclick = function () {
       q.value = ""; S.q = ""; field.classList.remove("has-val"); renderTools(); q.focus();
     };
+
+    var skillsQ = document.getElementById("skillsQ");
+    var skillsField = document.getElementById("skillsField");
+    if (skillsQ) {
+      skillsQ.oninput = function () {
+        if (skillsField) skillsField.classList.toggle("has-val", !!skillsQ.value);
+        renderSkills();
+      };
+      var skillsQClear = document.getElementById("skillsQClear");
+      if (skillsQClear) {
+        skillsQClear.onclick = function () {
+          skillsQ.value = "";
+          if (skillsField) skillsField.classList.remove("has-val");
+          renderSkills();
+          skillsQ.focus();
+        };
+      }
+    }
 
     var compSel = document.getElementById("companySelect");
     if (compSel) {

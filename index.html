@@ -42,6 +42,7 @@
       <button role="tab" data-view="tools" aria-selected="true">Ferramentas</button>
       <button role="tab" data-view="systems" aria-selected="false">Sistemas</button>
       <button role="tab" data-view="matrix" aria-selected="false">Matriz</button>
+      <button role="tab" data-view="skills" aria-selected="false">Skills</button>
     </div>
 
     <div class="hdr-actions">
@@ -103,6 +104,31 @@
         <div class="grid" id="grid"></div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ ORION AGENT SKILLS ============ -->
+<section class="view" id="v-skills">
+  <div class="shell">
+    <div class="hero">
+      <div class="eyebrow">Desenvolvimento assistido por IA</div>
+      <h1>Orion Agent<br />Skills.</h1>
+      <p>Biblioteca central do Grupo Orion para agentes de IA: padrões técnicos reutilizáveis, standards canônicos e auditorias especializadas para trabalhar nos repositórios do grupo.</p>
+      <div class="skills-hero-meta"><span id="skillsCount"></span><span>6 áreas de especialidade</span></div>
+    </div>
+
+    <div class="skills-toolbar">
+      <div class="field" id="skillsField">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="skillsQ" type="text" placeholder="Filtrar skills…" autocomplete="off" spellcheck="false" />
+        <button class="field-clear" id="skillsQClear" aria-label="Limpar filtro de skills">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <a class="skills-source-link" href="https://github.com/portais-orion/orion-agent-skills" target="_blank" rel="noopener">Abrir biblioteca ↗</a>
+    </div>
+    <div class="skills-meta-line" id="skillsMeta"></div>
+    <div class="skills-groups" id="skillsGroups"></div>
   </div>
 </section>
 
