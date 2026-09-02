@@ -46,6 +46,8 @@ jobs:
           cp app.js dist/
           cp systems.json dist/
           cp tools.json dist/
+          cp orion-skills.json dist/
+          cp orion-skills-guide.json dist/
           cp -r assets/ dist/
           cp .nojekyll dist/ || true
           
