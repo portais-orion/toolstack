@@ -5,6 +5,7 @@
     tools: [],
     systems: [],
     skills: [],
+    skillsGuide: null,
     byId: {},
     q: "",
     cat: "Todas",
@@ -114,11 +115,13 @@
   Promise.all([
     fetch("tools.json").then(function (r) { return r.json(); }),
     fetch("systems.json").then(function (r) { return r.json(); }),
-    fetch("orion-skills.json").then(function (r) { return r.json(); })
+    fetch("orion-skills.json").then(function (r) { return r.json(); }),
+    fetch("orion-skills-guide.json").then(function (r) { return r.json(); })
   ]).then(function (r) {
     S.tools = r[0];
     S.systems = r[1];
     S.skills = r[2];
+    S.skillsGuide = r[3];
     S.tools.forEach(function (t) { S.byId[t.id] = t; });
     S.sysIds = S.systems.map(function (s) { return s.id; });
 
@@ -130,10 +133,12 @@
     buildStats();
     buildRail();
     buildLayerPills();
-    renderTools();
+renderTools();
     renderSystems();
     renderMatrix();
     renderSkills();
+    renderBrève();
+    renderSkillsGuide();
     buildStackHealth();
     bind();
     route(true);
@@ -994,19 +999,159 @@
       groups[category].sort(function (a, b) { return a.name.localeCompare(b.name, "pt"); }).forEach(function (skill) {
         var card = document.createElement("article");
         card.className = "skill-card";
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", "Ver detalhes de " + skill.name);
         card.innerHTML = '<div class="skill-card-icon">✦</div><div><h3></h3><p></p></div>';
         card.querySelector("h3").textContent = skill.name;
         card.querySelector("p").textContent = skill.description;
+        card.onclick = function () { openSkillDetail(skill); };
+        card.onkeydown = function (event) {
+          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openSkillDetail(skill); }
+        };
         grid.appendChild(card);
       });
       section.appendChild(grid);
       host.appendChild(section);
     });
+}
+
+  function renderBrève() {
+    var grid = document.getElementById("grid-brève");
+    var meta = document.getElementById("meta-brève");
+
+    meta.innerHTML = "<b>Em desenvolvimento</b> - boilerplate/starter template para nucleo-portais";
+
+    grid.innerHTML =
+      '<div class="empty">' +
+        '<div class="empty-i"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>' +
+        "<h3>Breve em breve</h3>" +
+        "<p>Fique ligado! Em breve teremos o boilerplate/starter template do nucleo-portais disponível.</p>" +
+        "<p>O projeto estará pronto em breve com:</p>" +
+        "<ul>" +
+          "<li>Scaffold via CLI: `pnpm create nucleo-portal`</li>" +
+          "<li>Backend: NestJS com ApplicationRegistry, guards, repositories</li>" +
+          "<li>Frontend: Route groups, auth, permissions, TanStack Query</li>" +
+          "<li>Packages: auth, config, types, database com seed</li>" +
+          "<li>Makefile, CI, gerador de feature module</li>" +
+        "</ul>" +
+      "</div>";
+  }
+
+  function guideBlock(title, content) {
+    var block = document.createElement("section");
+    block.className = "guide-section";
+    block.innerHTML = '<h2>' + esc(title) + '</h2>';
+    block.appendChild(content);
+    return block;
+  }
+
+  function renderSkillsGuide() {
+    var guide = S.skillsGuide;
+    var host = document.getElementById("skillsGuideContent");
+    var intro = document.getElementById("skillsGuideIntro");
+    if (!guide || !host) return;
+    if (intro) intro.textContent = guide.intro;
+    host.innerHTML = "";
+
+    var prerequisites = document.createElement("ul");
+    prerequisites.className = "guide-list";
+    guide.prerequisites.forEach(function (item) {
+      var li = document.createElement("li"); li.textContent = item; prerequisites.appendChild(li);
+    });
+    host.appendChild(guideBlock("Pré-requisitos", prerequisites));
+
+    var install = document.createElement("div");
+    install.className = "guide-callout";
+    install.innerHTML = '<p>Instalação global para Claude Code e Codex</p><div class="guide-command"><code></code><button type="button" class="copy-btn">Copiar</button></div>';
+    install.querySelector("code").textContent = guide.commands[0].command;
+    install.querySelector(".copy-btn").onclick = function () { copyToClipboard(guide.commands[0].command, this); };
+    host.appendChild(guideBlock("Instalação", install));
+
+    var sourceGrid = document.createElement("div");
+    sourceGrid.className = "guide-source-grid";
+    guide.sources.forEach(function (source) {
+      var card = document.createElement("article");
+      card.className = "guide-source-card";
+      card.innerHTML = '<h3></h3><code></code><p></p>';
+      card.querySelector("h3").textContent = source.name;
+      card.querySelector("code").textContent = source.repo;
+      card.querySelector("p").textContent = source.description;
+      sourceGrid.appendChild(card);
+    });
+    host.appendChild(guideBlock("Fontes instaladas", sourceGrid));
+
+    var commands = document.createElement("div");
+    commands.className = "guide-commands";
+    guide.commands.forEach(function (item) {
+      var row = document.createElement("div");
+      row.className = "guide-command-row";
+      row.innerHTML = '<div><code></code><strong></strong><p></p></div><button type="button" class="copy-btn">Copiar</button>';
+      row.querySelector("code").textContent = item.command;
+      row.querySelector("strong").textContent = item.label;
+      row.querySelector("p").textContent = item.description;
+      row.querySelector(".copy-btn").onclick = function () { copyToClipboard(item.command, this); };
+      commands.appendChild(row);
+    });
+    host.appendChild(guideBlock("Comandos disponíveis", commands));
+
+    var prompts = document.createElement("div");
+    prompts.className = "guide-prompts";
+    guide.promptExamples.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "guide-prompt";
+      row.innerHTML = '<p></p><code>→ </code><strong></strong>';
+      row.querySelector("p").textContent = "“" + item.prompt + "”";
+      row.querySelector("strong").textContent = item.skill;
+      prompts.appendChild(row);
+    });
+    host.appendChild(guideBlock("Como as skills são escolhidas", prompts));
+
+    var troubleshooting = document.createElement("div");
+    troubleshooting.className = "guide-faq";
+    guide.troubleshooting.concat(guide.faq).forEach(function (item) {
+      var row = document.createElement("article");
+      row.innerHTML = '<h3></h3><p></p>';
+      row.querySelector("h3").textContent = item.problem || item.question;
+      row.querySelector("p").textContent = item.resolution || item.answer;
+      troubleshooting.appendChild(row);
+    });
+    host.appendChild(guideBlock("Diagnóstico e FAQ", troubleshooting));
+  }
+
+  function openInstallModal() {
+    var command = "npx @portais-orion/skills@latest";
+    var m = document.getElementById("modal");
+    m.innerHTML = '<div class="m-head"><span class="m-title"><h2>Instalação rápida</h2><div class="t-cat">Orion Agent Skills</div></span><div class="m-actions"><button class="m-x" aria-label="Fechar">×</button></div></div>' +
+      '<div class="m-body install-modal-body"><p>Instala globalmente o ambiente padrão de Agent Skills para Claude Code e Codex.</p><div class="guide-command install-command"><code></code><button type="button" class="copy-btn">Copiar comando</button></div></div>';
+    m.querySelector("code").textContent = command;
+    m.querySelector(".copy-btn").onclick = function () { copyToClipboard(command, this); };
+    m.querySelector(".m-x").onclick = closeAll;
+    open(m);
+  }
+
+  function openSkillDetail(skill, opts) {
+    opts = opts || {};
+    if (!opts.keepHash) history.replaceState(null, "", "#skill/" + encodeURIComponent(skill.name));
+    var example = (S.skillsGuide && S.skillsGuide.promptExamples || []).find(function (item) { return item.skill === skill.name; });
+    var sourceUrl = "https://github.com/portais-orion/orion-agent-skills/tree/main/skills/" + skill.category + "/" + skill.name;
+    var m = document.getElementById("modal");
+    m.innerHTML = '<div class="m-head"><span class="m-title"><h2></h2><div class="t-cat"></div></span><div class="m-actions"><button class="m-x" aria-label="Fechar">×</button></div></div>' +
+      '<div class="m-body skill-detail"><p class="lbl">Descrição</p><p class="skill-detail-description"></p>' +
+      (example ? '<p class="lbl">Exemplo de prompt</p><p class="skill-detail-prompt"></p>' : "") +
+      '<a class="m-link" target="_blank" rel="noopener">Ver documentação da skill ↗</a></div>';
+    m.querySelector("h2").textContent = skill.name;
+    m.querySelector(".t-cat").textContent = SKILL_CATEGORY_LABELS[skill.category] || skill.category;
+    m.querySelector(".skill-detail-description").textContent = skill.description;
+    if (example) m.querySelector(".skill-detail-prompt").textContent = "“" + example.prompt + "”";
+    m.querySelector(".m-link").href = sourceUrl;
+    m.querySelector(".m-x").onclick = closeAll;
+    open(m);
   }
 
   /* ---------------- navigation ---------------- */
 
-  function setView(v, opts) {
+function setView(v, opts) {
     opts = opts || {};
     S.view = v;
     document.getElementById("v-tools").classList.toggle("on", v === "tools");
@@ -1015,8 +1160,13 @@
     if (vMatrix) vMatrix.classList.toggle("on", v === "matrix");
     var vSkills = document.getElementById("v-skills");
     if (vSkills) vSkills.classList.toggle("on", v === "skills");
+    var vSkillsGuide = document.getElementById("skillsGuideView");
+    if (vSkillsGuide) vSkillsGuide.classList.toggle("on", v === "skills-guide");
+    var vBrève = document.getElementById("v-brève");
+    if (vBrève) vBrève.classList.toggle("on", v === "brève");
+    if (vBrève && v === "brève") renderBrève();
     Array.prototype.forEach.call(document.querySelectorAll(".hdr .seg button"), function (b) {
-      b.setAttribute("aria-selected", String(b.dataset.view === v));
+      b.setAttribute("aria-selected", String(b.dataset.view === (v === "skills-guide" ? "skills" : v)));
     });
     if (!opts.keepHash) history.replaceState(null, "", "#" + v);
     if (!opts.noScroll) window.scrollTo({ top: 0, behavior: opts.instant ? "auto" : "smooth" });
@@ -1037,9 +1187,20 @@
     } else if (raw === "matrix" || raw === "matriz") {
       closeSheets();
       setView("matrix", { keepHash: true, instant: instant, noScroll: instant });
+    } else if (raw === "skills/guia") {
+      closeSheets();
+      setView("skills-guide", { keepHash: true, instant: instant, noScroll: instant });
+    } else if (raw.indexOf("skill/") === 0) {
+      var skillName = decodeURIComponent(raw.replace("skill/", ""));
+      var skill = S.skills.find(function (item) { return item.name === skillName; });
+      setView("skills", { keepHash: true, instant: instant, noScroll: instant });
+      if (skill) openSkillDetail(skill, { keepHash: true });
     } else if (raw === "skills") {
       closeSheets();
       setView("skills", { keepHash: true, instant: instant, noScroll: instant });
+    } else if (raw === "brève" || raw === "breve") {
+      closeSheets();
+      setView("brève", { keepHash: true, instant: instant, noScroll: instant });
     } else {
       closeSheets();
       setView(raw === "systems" ? "systems" : "tools", { keepHash: true, instant: instant, noScroll: instant });
@@ -1277,7 +1438,9 @@
     document.getElementById("scrim").classList.remove("on");
     document.body.style.overflow = "";
     if (location.hash && location.hash.indexOf("#tool/") === 0) {
-      history.replaceState(null, "", "#" + S.view);
+      history.replaceState(null, "", "#tools");
+    } else if (location.hash && location.hash.indexOf("#skill/") === 0) {
+      history.replaceState(null, "", "#skills");
     }
   }
 
@@ -1934,6 +2097,16 @@
         };
       }
     }
+
+    var installSkillsBtn = document.getElementById("installSkillsBtn");
+    if (installSkillsBtn) installSkillsBtn.onclick = openInstallModal;
+    var skillsGuideBtn = document.getElementById("skillsGuideBtn");
+    if (skillsGuideBtn) skillsGuideBtn.onclick = function () {
+      history.replaceState(null, "", "#skills/guia");
+      setView("skills-guide", { keepHash: true });
+    };
+    var skillsGuideBack = document.getElementById("skillsGuideBack");
+    if (skillsGuideBack) skillsGuideBack.onclick = function () { setView("skills"); };
 
     var compSel = document.getElementById("companySelect");
     if (compSel) {

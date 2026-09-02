@@ -10,3 +10,25 @@ test("guide has verified sections, commands, and sources", () => {
   assert.equal(guide.sources.length, 3);
   assert.ok(guide.promptExamples.length >= 4);
 });
+
+test("Skills view exposes onboarding action hooks", () => {
+  const html = fs.readFileSync("index.html", "utf8");
+  for (const id of ["installSkillsBtn", "skillsGuideBtn", "skillsGithubBtn", "skillsGuideView", "skillsGuideContent"]) {
+    assert.ok(html.includes(`id="${id}"`), `missing ${id}`);
+  }
+});
+
+test("app exposes guide loading and deep-link handlers", () => {
+  const app = fs.readFileSync("app.js", "utf8");
+  for (const hook of ["orion-skills-guide.json", "renderSkillsGuide", "openInstallModal", "openSkillDetail", "skills/guia", "skill/"]) {
+    assert.ok(app.includes(hook), `missing ${hook}`);
+  }
+});
+
+test("guide has dedicated responsive style hooks", () => {
+  const css = fs.readFileSync("styles.css", "utf8");
+  for (const hook of [".skills-actions", ".skills-guide-view", ".guide-command", ".guide-source-grid", ".skill-detail"]) {
+    assert.ok(css.includes(hook), `missing ${hook}`);
+  }
+  assert.match(css, /@media[^{]+\{[\s\S]*\.skills-actions/);
+});
