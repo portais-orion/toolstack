@@ -79,21 +79,21 @@ git add orion-skills-guide.json tests/skills-onboarding-contract.test.mjs valida
 git commit -m "feat: adiciona dados do guia de skills"
 ```
 
-### Task 2: Markup for actions and guide view
+### Task 2: Markup for tabs and guide view
 
 **Files:**
 - Modify: `index.html`
 - Test: `tests/skills-onboarding-contract.test.mjs`
 
-**Interfaces:** IDs `installSkillsBtn`, `skillsGuideBtn`, `skillsGithubBtn`, `skillsGuideView`, and `skillsGuideContent` are stable hooks consumed by `app.js`.
+**Interfaces:** IDs `skillsViewTabs`, `skillsCatalogTab`, `skillsGuideTab`, `skillsGuideView`, and `skillsGuideContent` are stable hooks consumed by `app.js`.
 
 - [ ] **Step 1: Add failing markup assertions**
 
 Assert each ID and the Skills CTA labels exist in `index.html`; run the test and observe failure.
 
-- [ ] **Step 2: Add CTAs and guide markup**
+- [ ] **Step 2: Add tabs and guide markup**
 
-Put three actions beside the existing library link in the Skills hero. Add a hidden-by-view guide section with a back action and empty `skillsGuideContent`; retain the catalog markup.
+Put `Catálogo` and `Guia de uso` role tabs below the Skills hero, with a discreet GitHub text link. Add a hidden-by-view guide section with a back action and empty `skillsGuideContent`; retain the catalog markup.
 
 - [ ] **Step 3: Run the contract test and commit**
 
@@ -115,17 +115,13 @@ Assert the app contains the guide fetch, the three functions, and both deep-link
 
 Fetch `orion-skills-guide.json` in the existing `Promise.all`; render guide after initialization; handle `#skills/guia` before generic `#skills`; toggle header aria state and close overlays on view changes.
 
-- [ ] **Step 3: Implement installation modal**
+- [ ] **Step 3: Implement guide rendering and skill detail**
 
-Render the exact base command, explanatory text, and copy action through the existing `#modal` sheet. Reuse `navigator.clipboard`, with visible “Copiado!” feedback.
+Render all guide sections from JSON, including the installation command and its copy action. Make catalog cards open `#skill/<name>` and a detail sheet containing name, area, description, source link, and matching prompt example. Use `textContent` for dynamic fields; ESC/backdrop closes and returns to the prior hash.
 
-- [ ] **Step 4: Implement guide rendering and skill detail**
+- [ ] **Step 4: Bind tabs and verify**
 
-Render all guide sections from JSON. Make catalog cards open `#skill/<name>` and a detail sheet containing name, area, description, source link, and matching prompt example. Use `textContent` for dynamic fields; ESC/backdrop closes and returns to the prior hash.
-
-- [ ] **Step 5: Bind actions and verify**
-
-Bind CTAs, back action, copy buttons, and route transitions. Run `node --check app.js` and the contract test; expect PASS. Commit `git add app.js tests/skills-onboarding-contract.test.mjs && git commit -m "feat: implementa guia e deep links das skills"`.
+Bind tabs, back action, copy buttons, and route transitions. Run `node --check app.js` and the contract test; expect PASS. Commit `git add app.js tests/skills-onboarding-contract.test.mjs && git commit -m "feat: implementa guia e deep links das skills"`.
 
 ### Task 4: Visual styling
 
@@ -133,11 +129,11 @@ Bind CTAs, back action, copy buttons, and route transitions. Run `node --check a
 - Modify: `styles.css`
 - Test: `tests/skills-onboarding-contract.test.mjs`
 
-**Interfaces:** Add `.skills-actions`, `.skills-guide-view`, `.guide-section`, `.guide-command`, `.guide-source-grid`, `.guide-callout`, `.guide-faq`, and `.skill-detail` using existing CSS variables.
+**Interfaces:** Add `.skills-local-nav`, `.skills-guide-view`, `.guide-section`, `.guide-command`, `.guide-source-grid`, `.guide-callout`, `.guide-faq`, and `.skill-detail` using existing CSS variables.
 
 - [ ] **Step 1: Add failing style assertions**
 
-Assert the class hooks and a mobile `.skills-actions` rule; run the test and observe failure.
+Assert the class hooks and a mobile `.skills-local-nav` rule; run the test and observe failure.
 
 - [ ] **Step 2: Style desktop and mobile states**
 

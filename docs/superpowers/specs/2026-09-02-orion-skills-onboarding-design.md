@@ -13,23 +13,17 @@ Transformar a área `Skills` do Stack Orion em ponto de onboarding para a biblio
 - Abrir detalhes num drawer/modal já existente na aplicação, exibindo nome, área, descrição e link para a biblioteca Orion.
 - Não criar campos curados de “quando não usar”, standards relacionados ou saídas esperadas nesta fase. Esses dados não possuem estrutura canônica uniforme na biblioteca fonte.
 
-### Ações do cabeçalho
+### Navegação interna
 
-A área `Skills` terá três ações:
+A área `Skills` usa abas internas, separadas da navegação global do Stack Orion:
 
-| Ação | Comportamento |
+| Aba/link | Comportamento |
 | --- | --- |
-| `Instalar skills` | Abre modal com o comando de instalação global e botão para copiar. |
-| `Guia de uso` | Navega para `#skills/guia`. |
-| `GitHub` | Abre `portais-orion/orion-agent-skills` em nova aba. |
+| `Catálogo` | Exibe as 26 skills agrupadas e filtráveis. |
+| `Guia de uso` | Navega para `#skills/guia` dentro da mesma view da SPA. |
+| `GitHub ↗` | Abre `portais-orion/orion-agent-skills` em nova aba como link textual discreto. |
 
-O modal de instalação apresenta:
-
-```bash
-npx @portais-orion/skills@latest
-```
-
-e informa que instala o conjunto padrão para Claude Code e Codex. O comando usa o instalador Orion; as fontes são instaladas globalmente pelo CLI oficial `skills`.
+O comando `npx @portais-orion/skills@latest` aparece destacado no início do guia, com ação pequena de copiar. Não há modal de instalação separado.
 
 ### Guia de uso
 
@@ -59,13 +53,13 @@ Cada comando de terminal possui ação de cópia. Os exemplos de prompt são edu
 | `#skills/guia` | Guia de instalação e uso. |
 | `#skill/<nome>` | Abre detalhes da skill e preserva deep link. |
 
-O modal de instalação não recebe rota própria. Os detalhes usam o padrão existente de sheet/modal, fecham com `Esc` ou backdrop e restauram o estado da rota ao fechar.
+Os detalhes usam o padrão existente de sheet/modal, fecham com `Esc` ou backdrop e restauram o estado da rota ao fechar. As abas mantêm `aria-selected` sincronizado com `#skills` e `#skills/guia`.
 
 ## UI e acessibilidade
 
 - Reutilizar tokens, tipografia, botões, cards, modal e temas existentes.
 - O guia é composto de blocos leves, comandos monoespaçados e chamadas visuais discretas; não deve parecer uma documentação pesada.
-- Botões recebem rótulos acessíveis; estado de cópia é anunciado visualmente.
+- Abas e ações de cópia recebem rótulos acessíveis; estado de cópia é anunciado visualmente.
 - O layout permanece responsivo, com CTAs empilhados em telas estreitas.
 
 ## Fora de escopo

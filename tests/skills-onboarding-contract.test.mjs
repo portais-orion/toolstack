@@ -13,22 +13,30 @@ test("guide has verified sections, commands, and sources", () => {
 
 test("Skills view exposes onboarding action hooks", () => {
   const html = fs.readFileSync("index.html", "utf8");
-  for (const id of ["installSkillsBtn", "skillsGuideBtn", "skillsGithubBtn", "skillsGuideView", "skillsGuideContent"]) {
+  for (const id of ["skillsViewTabs", "skillsCatalogTab", "skillsGuideTab", "skillsGuideView", "skillsGuideContent"]) {
     assert.ok(html.includes(`id="${id}"`), `missing ${id}`);
   }
 });
 
 test("app exposes guide loading and deep-link handlers", () => {
   const app = fs.readFileSync("app.js", "utf8");
-  for (const hook of ["orion-skills-guide.json", "renderSkillsGuide", "openInstallModal", "openSkillDetail", "skills/guia", "skill/"]) {
+  for (const hook of ["orion-skills-guide.json", "renderSkillsGuide", "openSkillDetail", "skills/guia", "skill/"]) {
     assert.ok(app.includes(hook), `missing ${hook}`);
   }
 });
 
 test("guide has dedicated responsive style hooks", () => {
   const css = fs.readFileSync("styles.css", "utf8");
-  for (const hook of [".skills-actions", ".skills-guide-view", ".guide-command", ".guide-source-grid", ".skill-detail"]) {
+  for (const hook of [".skills-local-nav", ".skills-guide-view", ".guide-command", ".guide-source-grid", ".skill-detail"]) {
     assert.ok(css.includes(hook), `missing ${hook}`);
   }
-  assert.match(css, /@media[^{]+\{[\s\S]*\.skills-actions/);
+  assert.match(css, /@media[^{]+\{[\s\S]*\.skills-local-nav/);
+});
+
+test("Skills uses in-page tabs instead of hero action buttons", () => {
+  const html = fs.readFileSync("index.html", "utf8");
+  assert.ok(html.includes("skillsViewTabs"), "missing in-page Skills tabs");
+  assert.ok(html.includes("skillsCatalogTab"), "missing catalog tab");
+  assert.ok(html.includes("skillsGuideTab"), "missing guide tab");
+  assert.ok(!html.includes("installSkillsBtn"), "old install CTA still present");
 });
