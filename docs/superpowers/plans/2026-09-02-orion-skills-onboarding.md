@@ -13,8 +13,8 @@
 ## Global Constraints
 
 - Preserve the current identity, header, typography, cards, filters, grouping, responsive behavior, and dark/light themes.
-- Use only commands documented in `C:\projetos\orion-skills-cli\README.md`; the install command is `npx @portais-orion/skills@latest`.
-- Keep installation global for the user, targeting Claude Code and Codex; the browser never executes the CLI.
+- Use only commands documented in `@skills-portais-orion/skills`; the install command is `npx @skills-portais-orion/skills@latest`.
+- Recommend local installation in the project repository, targeting Claude Code, Codex and Cursor; the browser never executes the CLI.
 - Do not duplicate complete `SKILL.md` content or invent per-skill standards metadata.
 - Escape dynamic content or assign it through `textContent` before DOM insertion.
 - Run `node --check app.js`, `node --test tests/skills-onboarding-contract.test.mjs`, `node validate.js`, and `git diff --check` before completion.

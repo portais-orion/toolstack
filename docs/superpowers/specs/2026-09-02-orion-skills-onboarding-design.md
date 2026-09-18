@@ -20,28 +20,29 @@ A área `Skills` usa abas internas, separadas da navegação global do Stack Ori
 | Aba/link | Comportamento |
 | --- | --- |
 | `Catálogo` | Exibe as 26 skills agrupadas e filtráveis. |
-| `Guia de uso` | Navega para `#skills/guia` dentro da mesma view da SPA. |
+| `Guia de instalação` | Navega para `#skills/guia` dentro da mesma view da SPA. |
+| `npm ↗` | Abre pacote oficial `@skills-portais-orion/skills` no npm. |
 | `GitHub ↗` | Abre `portais-orion/orion-agent-skills` em nova aba como link textual discreto. |
 
-O comando `npx @portais-orion/skills@latest` aparece destacado no início do guia, com ação pequena de copiar. Não há modal de instalação separado.
+O comando `npx @skills-portais-orion/skills@latest` aparece destacado no início do guia, com ação de copiar. O instalador interativo recomenda instalação local na raiz do repositório do projeto.
 
 ### Guia de uso
 
 A rota `#skills/guia` é uma view da SPA existente, sem aplicação, dependência ou página separada. O conteúdo é renderizado de `orion-skills-guide.json` e possui os seguintes blocos:
 
-1. Introdução e pré-requisitos: Node.js >= 18.17, Git e acesso ao repositório privado Orion; Claude Code e/ou Codex são opcionais para instalação, mas necessários para consumir as skills.
-2. Instalação global com `npx @portais-orion/skills@latest` e sua forma explícita `install`.
-3. Fontes instaladas: Orion (`portais-orion/orion-agent-skills`), Matt Pocock (`mattpocock/skills`) e Superpowers (`obra/superpowers`).
-4. Uso no projeto: iniciar Claude Code ou Codex no repositório; em tarefas normais, descrever a necessidade em linguagem natural para que o agente selecione a skill contextual.
-5. Comandos verificados: `install`, `update`, `list`, `list --json`, `sources` e `doctor`.
-6. Exemplos práticos de prompts, atualização, diagnóstico e FAQ.
+1. Introdução e pré-requisitos: Node.js >= 18.17, Git e execução na raiz do repositório do projeto; Claude Code, Codex ou Cursor para consumir as skills instaladas.
+2. Instalação recomendada com `npx @skills-portais-orion/skills@latest` (modo interativo local/global).
+3. Arquitetura e organização: pacote `@skills-portais-orion/skills`, camada `standards/` e camada `skills/`.
+4. Uso no projeto: executar o agente na raiz do repositório; descrever a necessidade em linguagem natural para que o agente selecione a skill contextual.
+5. Comandos verificados: instalador interativo, atalhos por `--skill`, instalação total não-interativa (`--skill '*' -y`), escopo global (`-g`) e teste local.
+6. Exemplos práticos de prompts, diagnóstico e FAQ.
 
 Cada comando de terminal possui ação de cópia. Os exemplos de prompt são educacionais: não prometem seleção determinística da skill, apenas mostram o caso de uso correspondente.
 
 ## Dados e validação
 
 - `orion-skills.json` continua como snapshot das skills próprias Orion extraído de `C:\projetos\orion-agent-skills`.
-- `orion-skills-guide.json` registra a documentação de onboarding e referências de origem no CLI em `C:\projetos\orion-skills-cli\README.md`.
+- `orion-skills-guide.json` registra a documentação de onboarding e comandos baseados em `@skills-portais-orion/skills`.
 - `validate.js` valida o novo arquivo: campos obrigatórios, IDs únicos, comandos e referências de fonte.
 - Um teste de contrato local compara o catálogo Orion com a biblioteca e confirma que os comandos exibidos estão documentados pelo CLI.
 

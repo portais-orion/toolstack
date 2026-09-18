@@ -1038,6 +1038,7 @@ kbd {
 .skill-detail-description,
 .skill-detail-prompt { line-height: 1.6; }
 .skill-detail-prompt { color: var(--text-muted); font-style: italic; }
+.skill-detail .guide-command { margin: 6px 0 16px; }
 
 .skills-group { margin-bottom: 38px; }
 .skills-group:last-child { margin-bottom: 0; }

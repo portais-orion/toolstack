@@ -1,63 +1,63 @@
 {
-  "intro": "O instalador Orion prepara, com um único comando, o ambiente padrão de Agent Skills para Claude Code e Codex.",
+  "intro": "O pacote @skills-portais-orion/skills centraliza a biblioteca Orion de conhecimento técnico, Golden Path, Standards de engenharia e comportamentos reutilizáveis para agentes de IA (Claude Code, Codex, Cursor, etc).",
   "prerequisites": [
-    "Node.js 18.17 ou superior",
-    "Git",
-    "Acesso via gh, SSH ou credential helper ao repositório privado da Orion",
-    "Claude Code e/ou Codex para consumir as skills instaladas"
+    "Node.js 18.17 ou superior (npx incluso)",
+    "Git instalado e configurado no ambiente",
+    "Execução no terminal na pasta raiz do repositório do seu projeto (para instalação Local recomendada)",
+    "Claude Code, Codex, Cursor ou outro agente compatível para consumir as skills"
   ],
   "sources": [
     {
-      "name": "Orion Agent Skills",
-      "repo": "portais-orion/orion-agent-skills",
-      "description": "Skills internas do Grupo Orion: Design System Orion, padrões NestJS/Prisma e procedimentos compartilhados."
+      "name": "@skills-portais-orion/skills",
+      "repo": "npmjs.com/package/@skills-portais-orion/skills",
+      "description": "Pacote canônico no registry npm com instalador interativo que adiciona as skills e standards ao repositório do seu projeto."
     },
     {
-      "name": "Matt Pocock",
-      "repo": "mattpocock/skills",
-      "description": "Kit de engenharia para debugging, TDD, code review, specs, tickets e triage."
+      "name": "Camada standards/",
+      "repo": "standards/ (engineering, machine-readable, golden-path)",
+      "description": "Política canônica, regras de arquitetura (ORION-*) e qualidade para desenvolvedores, agentes e pipelines de CI."
     },
     {
-      "name": "Superpowers",
-      "repo": "obra/superpowers",
-      "description": "Skills complementares de engenharia e workflow."
+      "name": "Camada skills/",
+      "repo": "skills/ (design-system, backend, mobile, platform, orion)",
+      "description": "26 comportamentos e prompts de agentes prontos para uso, que aplicam os standards automaticamente no seu projeto."
     }
   ],
   "commands": [
     {
-      "command": "npx @portais-orion/skills@latest",
-      "label": "Instalar padrão",
-      "description": "Instala globalmente todas as fontes habilitadas para Claude Code e Codex."
+      "command": "npx @skills-portais-orion/skills@latest",
+      "label": "Instalador interativo (Recomendado)",
+      "description": "Abre o assistente no terminal perguntando se deseja instalar localmente no projeto (recomendado) ou globalmente, e permite selecionar as skills."
     },
     {
-      "command": "npx @portais-orion/skills@latest install",
-      "label": "Instalar explicitamente",
-      "description": "Executa a instalação global do registry Orion."
+      "command": "npx @skills-portais-orion/skills@latest --skill pre-deploy-check",
+      "label": "Instalar skill específica",
+      "description": "Atalho para instalar diretamente uma skill específica no repositório sem passar pelo menu interativo."
     },
     {
-      "command": "npx @portais-orion/skills@latest update",
-      "label": "Atualizar",
-      "description": "Atualiza as skills globais usando o CLI oficial skills."
+      "command": "npx @skills-portais-orion/skills@latest --skill '*' -y",
+      "label": "Instalar / Atualizar tudo",
+      "description": "Instala ou atualiza todas as 26 skills de uma só vez no projeto de forma silenciosa e não-interativa."
     },
     {
-      "command": "npx @portais-orion/skills@latest list",
-      "label": "Listar",
-      "description": "Mostra as skills instaladas agrupadas por fonte."
+      "command": "npx @skills-portais-orion/skills@latest -g",
+      "label": "Instalação global",
+      "description": "Executa o instalador diretamente no escopo global do usuário (~/.claude/skills ou ~/.agents/skills)."
     },
     {
-      "command": "npx @portais-orion/skills@latest list --json",
-      "label": "Listar em JSON",
-      "description": "Exibe o catálogo instalado em formato JSON."
+      "command": "npx @skills-portais-orion/skills@latest --skill orion-design-system-adoption",
+      "label": "Adicionar skill do Design System",
+      "description": "Instala a skill de migração gradual de componentes para o Design System Orion (@design-systems-orion)."
     },
     {
-      "command": "npx @portais-orion/skills@latest sources",
-      "label": "Ver fontes",
-      "description": "Lista fontes, repositórios, prioridades, agentes e exclusões do registry."
+      "command": "npx @skills-portais-orion/skills@latest --skill audit-orion-codebase",
+      "label": "Adicionar skill de Auditoria",
+      "description": "Instala a skill de auditoria automatizada para avaliar arquitetura, segurança e qualidade do repositório."
     },
     {
-      "command": "npx @portais-orion/skills@latest doctor",
-      "label": "Diagnosticar",
-      "description": "Verifica Node, Git, CLI skills, autenticação, agentes instalados e diretórios globais."
+      "command": "npx skills@latest add C:/projetos/orion-agent-skills --list",
+      "label": "Testar localmente (Dev/Arquitetura)",
+      "description": "Para o time de arquitetura/plataforma: valida a instalação apontando a CLI skills diretamente para a pasta do repositório clonado."
     }
   ],
   "promptExamples": [
@@ -84,38 +84,38 @@
   ],
   "troubleshooting": [
     {
-      "problem": "Node ou Git não encontrado",
-      "resolution": "Instale Node.js 18.17+ e Git, depois rode o comando doctor novamente."
+      "problem": "Node.js ou Git não encontrado",
+      "resolution": "Instale Node.js 18.17+ e Git no seu ambiente de desenvolvimento e certifique-se de que estão configurados no PATH."
     },
     {
-      "problem": "Falha ao acessar a fonte privada Orion",
-      "resolution": "Configure autenticação Git/GitHub por credential helper, gh, SSH ou GITHUB_TOKEN/GH_TOKEN."
+      "problem": "Instalação interativa não aceita comandos no terminal",
+      "resolution": "Em ambientes sem suporte a interatividade (TTY), use os atalhos diretos com a flag silenciosa: npx @skills-portais-orion/skills@latest --skill '*' -y."
     },
     {
-      "problem": "Claude Code ou Codex não detectado",
-      "resolution": "A instalação não depende dos agentes; instale o agente desejado para que ele carregue as skills globais."
+      "problem": "O agente de IA (Claude Code, Cursor, Codex) não detecta as skills",
+      "resolution": "Certifique-se de iniciar o agente a partir da raiz do repositório onde as skills foram instaladas (pasta .agents/ ou .claude/)."
     },
     {
-      "problem": "Skills desatualizadas",
-      "resolution": "Execute npx @portais-orion/skills@latest update."
+      "problem": "Como atualizar para a versão mais recente das skills?",
+      "resolution": "Execute na raiz do projeto: npx @skills-portais-orion/skills@latest --skill '*' -y."
     }
   ],
   "faq": [
     {
-      "question": "Preciso instalar em cada projeto?",
-      "answer": "Não. A instalação é global por usuário; depois, abra Claude Code ou Codex dentro de qualquer projeto."
+      "question": "Por que a instalação Local é recomendada em vez de Global?",
+      "answer": "A instalação Local na raiz do repositório do seu projeto garante que as regras e skills fiquem commitadas no Git. Toda a equipe e agentes de CI compartilham o mesmo contexto e standards."
     },
     {
-      "question": "Preciso decorar os 26 nomes?",
-      "answer": "Não. Descreva a tarefa normalmente; o agente usa o contexto para selecionar a skill relevante."
+      "question": "Quais agentes de IA são compatíveis?",
+      "answer": "Claude Code, Codex, Cursor e qualquer agente compatível com o padrão de Agent Skills (pastas .claude/skills ou .agents/skills)."
     },
     {
-      "question": "O instalador copia as skills externas para a Orion?",
-      "answer": "Não. Matt Pocock e Superpowers são consumidos diretamente de seus repositórios upstream pelo CLI oficial."
+      "question": "Preciso memorizar os nomes das 26 skills?",
+      "answer": "Não. Descreva a tarefa normalmente em linguagem natural; o agente usa o contexto da conversa e do projeto para ativar a skill relevante automaticamente."
     },
     {
-      "question": "A instalação pede token da Orion?",
-      "answer": "Não como primeira opção. O CLI reutiliza a autenticação Git/GitHub já configurada no ambiente."
+      "question": "Qual é a relação entre as pastas standards/ e skills/?",
+      "answer": "A pasta standards/ define as políticas e regras canônicas de engenharia (ORION-*). A pasta skills/ contém os prompts e comportamentos executáveis que aplicam esses standards no dia a dia."
     }
   ]
 }

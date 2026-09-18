@@ -1040,7 +1040,7 @@ renderTools();
 
     var install = document.createElement("div");
     install.className = "guide-callout";
-    install.innerHTML = '<p>Instalação global para Claude Code e Codex</p><div class="guide-command"><code></code><button type="button" class="copy-btn">Copiar</button></div>';
+    install.innerHTML = '<p>Instalação recomendada (execute na raiz do repositório do seu projeto):</p><div class="guide-command"><code></code><button type="button" class="copy-btn">Copiar</button></div>';
     install.querySelector("code").textContent = guide.commands[0].command;
     install.querySelector(".copy-btn").onclick = function () { copyToClipboard(guide.commands[0].command, this); };
     host.appendChild(guideBlock("Instalação", install));
@@ -1056,7 +1056,7 @@ renderTools();
       card.querySelector("p").textContent = source.description;
       sourceGrid.appendChild(card);
     });
-    host.appendChild(guideBlock("Fontes instaladas", sourceGrid));
+    host.appendChild(guideBlock("Arquitetura e Organização", sourceGrid));
 
     var commands = document.createElement("div");
     commands.className = "guide-commands";
@@ -1101,14 +1101,18 @@ renderTools();
     if (!opts.keepHash) history.replaceState(null, "", "#skill/" + encodeURIComponent(skill.name));
     var example = (S.skillsGuide && S.skillsGuide.promptExamples || []).find(function (item) { return item.skill === skill.name; });
     var sourceUrl = "https://github.com/portais-orion/orion-agent-skills/tree/main/skills/" + skill.category + "/" + skill.name;
+    var cmdInstall = "npx @skills-portais-orion/skills@latest --skill " + skill.name;
     var m = document.getElementById("modal");
     m.innerHTML = '<div class="m-head"><span class="m-title"><h2></h2><div class="t-cat"></div></span><div class="m-actions"><button class="m-x" aria-label="Fechar">×</button></div></div>' +
       '<div class="m-body skill-detail"><p class="lbl">Descrição</p><p class="skill-detail-description"></p>' +
+      '<p class="lbl">Instalar esta skill</p><div class="guide-command"><code></code><button type="button" class="copy-btn">Copiar</button></div>' +
       (example ? '<p class="lbl">Exemplo de prompt</p><p class="skill-detail-prompt"></p>' : "") +
       '<a class="m-link" target="_blank" rel="noopener">Ver documentação da skill ↗</a></div>';
     m.querySelector("h2").textContent = skill.name;
     m.querySelector(".t-cat").textContent = SKILL_CATEGORY_LABELS[skill.category] || skill.category;
     m.querySelector(".skill-detail-description").textContent = skill.description;
+    m.querySelector(".guide-command code").textContent = cmdInstall;
+    m.querySelector(".guide-command .copy-btn").onclick = function () { copyToClipboard(cmdInstall, this); };
     if (example) m.querySelector(".skill-detail-prompt").textContent = "“" + example.prompt + "”";
     m.querySelector(".m-link").href = sourceUrl;
     m.querySelector(".m-x").onclick = closeAll;
